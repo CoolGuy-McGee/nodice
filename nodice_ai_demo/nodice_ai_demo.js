@@ -1,18 +1,21 @@
+// Roll a die with the given number of sides using cryptographically strong randomness
 function rollDie(sides) {
     const array = new Uint32Array(1);
     window.crypto.getRandomValues(array);
     return (array[0] % sides) + 1;
 }
 
-const diceTypes = [6, 6, 6, 6, 6, 6];
-let diceResults = Array(diceTypes.length).fill(1);
-let selectedDice = Array(diceTypes.length).fill(false);
-let diceBanked = Array(diceTypes.length).fill(false);
-let score = 0;         // Current roll score
-let runScore = 0;      // Score banked during this run
-let totalScore = 0;    // Score banked at end of turn
-let runActive = true;
+// --- Game State Variables ---
+const diceTypes = [6, 6, 6, 6, 6, 6]; // Array of dice, each with 6 sides
+let diceResults = Array(diceTypes.length).fill(1);      // Current face values for each die
+let selectedDice = Array(diceTypes.length).fill(false); // Which dice are selected this roll
+let diceBanked = Array(diceTypes.length).fill(false);   // Which dice have been banked (removed from play)
+let score = 0;         // Score for current roll (not yet banked)
+let runScore = 0;      // Score banked during this run (resets if run is lost)
+let totalScore = 0;    // Score banked at end of turn (persists across runs)
+let runActive = true;  // Is the run still active?
 
+// --- Render Dice Buttons and UI ---
 function renderDice() {
     const container = document.getElementById('dice-container');
     container.innerHTML = '';
@@ -25,7 +28,7 @@ function renderDice() {
         }
     });
 
-    let anyEnabled = false;
+    let anyEnabled = false; // Track if any dice can be selected
 
     diceTypes.forEach((sides, i) => {
         if (diceBanked[i]) return; // Skip banked dice
@@ -34,7 +37,7 @@ function renderDice() {
         btn.textContent = `d${sides}: ${val}`;
         btn.style.background = selectedDice[i] ? '#90ee90' : '';
 
-        // Enable if 1 or 5, or if three of a kind
+        // Enable button if die is a 1 or 5, or part of a three-of-a-kind
         if (val === 1 || val === 5 || valueCounts[val] >= 3) {
             btn.disabled = false;
             anyEnabled = true;
@@ -43,6 +46,7 @@ function renderDice() {
             btn.style.background = '#eee';
         }
 
+        // --- Dice Selection Logic ---
         btn.onclick = () => {
             // Handle three-of-a-kind for any value (including 1 and 5)
             if (valueCounts[val] >= 3) {
@@ -99,18 +103,23 @@ function renderDice() {
         container.appendChild(btn);
     });
 
+    // --- Update UI Elements ---
     document.getElementById('score').textContent = score;
     document.getElementById('runscore').textContent = runScore;
     document.getElementById('totalscore').textContent = totalScore;
-    document.getElementById('message').textContent = runActive ? 'Select dice to keep (1, 5, or three of a kind).' : 'You lost your run! Roll again to start a new run.';
+    document.getElementById('message').textContent = runActive
+        ? 'Select dice to keep (1, 5, or three of a kind).'
+        : 'You lost your run! Roll again to start a new run.';
 }
 
+// --- Update Score Display ---
 function updateScore() {
     document.getElementById('score').textContent = score;
     document.getElementById('runscore').textContent = runScore;
     document.getElementById('totalscore').textContent = totalScore;
 }
 
+// --- Roll Dice Logic ---
 function rollAllDice() {
     // If all dice are banked, unbank them (but do NOT reset runScore or score)
     if (diceBanked.every(b => b)) {
@@ -171,10 +180,11 @@ function rollAllDice() {
     updateScore();
 }
 
+// --- Bank Score Logic ---
 function bankScore() {
-    runScore += score;
+    runScore += score; // Add current roll score to run score
     score = 0;
-    // Remove selected dice from play
+    // Remove selected dice from play (bank them)
     selectedDice.forEach((selected, i) => {
         if (selected) {
             diceBanked[i] = true;
@@ -187,8 +197,9 @@ function bankScore() {
     renderDice();
 }
 
+// --- End Turn Logic ---
 function endTurn() {
-    totalScore += runScore;
+    totalScore += runScore; // Add run score to total score
     runScore = 0;
     score = 0;
     diceBanked = Array(diceTypes.length).fill(false);
@@ -203,10 +214,10 @@ function endTurn() {
     updateScore();
 }
 
-// Attach button events
+// --- Attach Button Events ---
 document.getElementById('roll-btn').onclick = rollAllDice;
 document.getElementById('bank-btn').onclick = bankScore;
 document.getElementById('endturn-btn').onclick = endTurn;
 
-// Initial render
+// --- Initial Render ---
 rollAllDice();
