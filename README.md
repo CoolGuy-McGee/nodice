@@ -29,12 +29,12 @@ This project is a web-based version of the classic dice game **Farkle**. Our goa
 
 The Chaos Modifiers are game-altering rules designed to shake up the standard Farkle experience and increase replayability. These features are prioritized as they represent the project's unique value proposition.
 
-| Modifier | Effect on Gameplay | Status |
-| **Variable Dice Pool** | On roll, the number of dice available is randomly set between 4 and 8 (instead of the standard 6). | To Do |
-| **Double Points** | A randomly selected die (or a specific die value) has its score value doubled *if* it is successfully banked. | To Do |
-| **Forced Bank** | At the beginning of the turn, the player is forced to select and bank a single '1' or '5' *if available*, disrupting plans for larger sets. | To Do |
-| **Mirror Image** | When a player banks a set of three dice, the next die rolled will automatically show the same value as the **lowest** banked die in that set (for the first roll only). | To Do |
-| **Custom Scoring** | Planned option to allow players to change the point requirements or values of 1s, 5s, and sets before the game starts. | To Do |
+
+- **Variable Dice Pool** On roll, the number of dice available is randomly set between 4 and 8 (instead of the standard 6).
+- **Double Points** A randomly selected die (or a specific die value) has its score value doubled *if* it is successfully banked.
+- **Forced Bank** At the beginning of the turn, the player is forced to select and bank a single '1' or '5' *if available*, disrupting plans for larger sets.
+- **Mirror Image** When a player banks a set of three dice, the next die rolled will automatically show the same value as the **lowest** banked die in that set (for the first roll only).
+- **Custom Scoring** Planned option to allow players to change the point requirements or values of 1s, 5s, and sets before the game starts.
 
 ---
 
