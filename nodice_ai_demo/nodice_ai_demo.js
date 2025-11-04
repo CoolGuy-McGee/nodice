@@ -30,24 +30,37 @@ function renderDice() {
 
     let anyEnabled = false; // Track if any dice can be selected
 
+    // Main changes where just replacing buttons with divs, dies is main container, dieb is color background, and dies is dice background
+
     diceTypes.forEach((sides, i) => {
         if (diceBanked[i]) return; // Skip banked dice
         const val = diceResults[i];
-        const btn = document.createElement('button');
-        btn.textContent = `d${sides}: ${val}`;
-        btn.style.background = selectedDice[i] ? '#90ee90' : '';
+        //const btn = document.createElement('button');
+        const dies = document.createElement('div');
+        dies.classList.add('dice-display');
+        const dieb = document.createElement('div');
+        dieb.classList.add('bg-display');
+        dies.classList.toggle('selected', selectedDice[i]);
+        //dies.style.backgroundImage = selectedDice[i] ? 'url(assets/green.png)' : '';
+        const dien = document.createElement('div');
+        dien.classList.add('dice-ds');
+        //btn.textContent = `d${sides}: ${val}`;
+        //btn.style.background = selectedDice[i] ? '#90ee90' : '';
 
-        // Enable button if die is a 1 or 5, or part of a three-of-a-kind
+        // Enable button if die is a 2 or 5, or part of a three-of-a-kind
         if (val === 1 || val === 5 || valueCounts[val] >= 3) {
-            btn.disabled = false;
+            //btn.disabled = false;
+            // dien.disabled = false; set bg-display to a different image for specific instance
             anyEnabled = true;
         } else {
-            btn.disabled = true;
-            btn.style.background = '#eee';
+            dies.classList.add('disabled');
+            //dieb.style.backgroundImage = 'url(assets/gray.png)';
+            //btn.disabled = true;
+            //btn.style.background = '#eee';
         }
 
         // --- Dice Selection Logic ---
-        btn.onclick = () => {
+        dies.onclick = () => {
             // Handle three-of-a-kind for any value (including 1 and 5)
             if (valueCounts[val] >= 3) {
                 // Find all indices of dice with this value that are not banked
@@ -58,6 +71,7 @@ function renderDice() {
                     }
                 });
                 // Find which set this die belongs to
+                // const dien = document.createElement('img');
                 let setIdx = -1;
                 for (let j = 0; j <= indices.length - 3; j += 3) {
                     const set = indices.slice(j, j + 3);
@@ -100,7 +114,11 @@ function renderDice() {
             renderDice();
         };
 
-        container.appendChild(btn);
+        //container.appendChild(btn);
+        container.appendChild(dies);
+        dies.appendChild(dieb);
+        dies.appendChild(dien);
+        dien.style.backgroundPosition = `-${val-1}00% 0%`;
     });
 
     // --- Update UI Elements ---
@@ -176,6 +194,7 @@ function rollAllDice() {
         document.getElementById('message').textContent = 'You lost your run! All dice are available for the next roll.';
     }
 
+    score=0;
     renderDice();
     updateScore();
 }
