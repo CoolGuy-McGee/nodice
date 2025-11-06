@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>No Dice</title>
+  <title>NoDice</title>
   <link rel="icon" type="image/x-icon" href="assets/dicedn.png"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reseter.css/1.0.8/reseter.min.css" integrity="sha512-w7sMEM5yzmuVP9ic9zpCLk/+whwrrhkH5g83x0wi5DEPo1y+/JniMmCVfbtjw5JipFpcCb4gyF2xLES6tc+TxA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-  <h1>No Dice</h1>
+  <h1>Dice Roller</h1>
 
   <div id="dice-container">
     <!-- six dice buttons for manual interaction -->
@@ -52,44 +50,6 @@
   <h2>Run Score: <span id="runscore">0</span></h2>
   <h2>Total Score: <span id="totalscore">0</span></h2>
   <div id="message"></div>
-
-  <!-- Options Popup Menu -->
-<div id="options-popup" style="display:none; position:fixed; top:20%; left:50%; transform:translate(-50%,0); background:#fff; border:2px solid #333; padding:20px; z-index:1000;">
-  <h2>Options</h2>
-  <label>
-    <input type="checkbox" id="opt-enable-get-on-board" checked />
-    Require minimum to get on board:
-    <input type="number" id="opt-get-on-board-value" value="500" style="width:60px;" />
-  </label>
-  <br />
-  <label>
-    <input type="checkbox" id="opt-enable-min-run" checked />
-    Require minimum run to save score:
-    <input type="number" id="opt-min-run-value" value="350" style="width:60px;" />
-  </label>
-  <br />
-  <button id="options-score-btn">Adjust Scores</button>
-  <div id="score-submenu" style="display:none; margin-top:10px;">
-    <h3>Score Adjustments</h3>
-    <label>Single 1: <input type="number" id="opt-score-one-1" /></label><br />
-    <label>Single 5: <input type="number" id="opt-score-one-5" /></label><br />
-    <label>Three 1s: <input type="number" id="opt-score-three-1" /></label><br />
-    <label>Three 2s: <input type="number" id="opt-score-three-2" /></label><br />
-    <label>Three 3s: <input type="number" id="opt-score-three-3" /></label><br />
-    <label>Three 4s: <input type="number" id="opt-score-three-4" /></label><br />
-    <label>Three 5s: <input type="number" id="opt-score-three-5" /></label><br />
-    <label>Three 6s: <input type="number" id="opt-score-three-6" /></label><br />
-    <label>Four of a kind: <input type="number" id="opt-score-four-any" /></label><br />
-    <label>Five of a kind: <input type="number" id="opt-score-five-any" /></label><br />
-    <label>Six of a kind: <input type="number" id="opt-score-six-any" /></label><br />
-    <label>Straight: <input type="number" id="opt-score-straight" /></label><br />
-    <label>Two Triplets: <input type="number" id="opt-score-two-triplets" /></label><br />
-    <label>Four + Pair: <input type="number" id="opt-score-four-any-w-pair" /></label><br />
-    <button id="options-score-save-btn">Save Scores</button>
-  </div>
-  <button id="options-close-btn">Close</button>
-</div>
-<button id="options-btn" style="position:fixed;top:10px;right:10px;z-index:999;">Options</button>
 
   <!-- JS Module Imports -->
   <script type="module">

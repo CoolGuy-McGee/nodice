@@ -18,13 +18,6 @@
 button.selected {
     background-color: #39b93996;
     border: 3px solid black;
-    color: #fff;
-}
-button.dice-disabled {
-    background-color: #cccccc !important;
-    color: #888 !important;
-    border: 1px solid #888 !important;
-    cursor: not-allowed;
 }
 button {
     margin-bottom: 1%;

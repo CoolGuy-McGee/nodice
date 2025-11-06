@@ -1,4 +1,4 @@
-# No Dice (Farkle Web) 🎲
+# NoDice (Farkle Web) 🎲
 **The classic high-stakes dice game, rebuilt for the browser with a twist of Chaos.**
 
 [![Status: In Development](https://img.shields.io/badge/Status-In%20Development-blue)](https://github.com/your-username/farkle-web)
