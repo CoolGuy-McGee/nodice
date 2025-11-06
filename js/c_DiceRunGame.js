@@ -4,6 +4,7 @@ import c_DiceProbabilityModel from "./c_DiceProbabilityModel.js";
 import c_PatternBasedDiceGenerator from "./c_PatternBasedDiceGenerator.js";
 import c_SelectionManager from "./c_SelectionManager.js";
 import c_UIRenderer from "./c_UIRenderer.js";
+import c_OptionsMenu from "./c_OptionsMenu.js";
 
 export default class c_DiceRunGame {
     constructor() {
@@ -22,6 +23,7 @@ export default class c_DiceRunGame {
         this.hasRolledAtLeastOnce = false;
 
         this.generator = null;
+        this.optionsMenu = new c_OptionsMenu(DICE_SCORES);
 
         this._initialize();
         this._wireUIEvents();
@@ -141,13 +143,33 @@ export default class c_DiceRunGame {
     _onEndTurn() {
         if (!this.hasRolledAtLeastOnce) return;
 
-        this.totalScore += this.runScore;
+        const rules = this.optionsMenu.getRules();
+        let allowSave = true;
+        let message = "Turn ended. Total updated.";
+
+        // "Get on board" rule
+        if (rules.enableGetOnBoard && this.totalScore === 0) {
+            if (this.runScore < rules.getOnBoardValue) {
+                allowSave = false;
+                message = `You must earn at least ${rules.getOnBoardValue} points to get on the board. Score not saved.`;
+            }
+        }
+        // "Minimum run" rule
+        else if (rules.enableMinRun && this.runScore < rules.minRunValue) {
+            allowSave = false;
+            message = `You must earn at least ${rules.minRunValue} points in a run to save your score. Score not saved.`;
+        }
+
+        if (allowSave) {
+            this.totalScore += this.runScore;
+        }
+
         this.runScore = 0;
         this.currentRollScore = 0;
         this.bankedDiceMask = [false, false, false, false, false, false];
         this.selectedDiceMask = [false, false, false, false, false, false];
         this.hasRolledAtLeastOnce = false;
-        this._refreshUI(undefined, undefined, "Turn ended. Total updated.");
+        this._refreshUI(undefined, undefined, message);
     }
 
     _recomputeSelectedScore() {
@@ -170,6 +192,20 @@ export default class c_DiceRunGame {
     _refreshUI(mostRecentPatternKey, mostRecentPatternScore, overrideMessage) {
         let selectableMask = this._computeSelectableMaskConsideringBanked();
 
+        const rules = this.optionsMenu.getRules();
+        let canEndTurn = true;
+
+        if (this.hasRolledAtLeastOnce) {
+            // "Get on board" rule
+            if (rules.enableGetOnBoard && this.totalScore === 0 && this.runScore < rules.getOnBoardValue) {
+                canEndTurn = false;
+            }
+            // "Minimum run" rule
+            else if (rules.enableMinRun && this.totalScore > 0 && this.runScore < rules.minRunValue) {
+                canEndTurn = false;
+            }
+        }
+
         if (!this.hasRolledAtLeastOnce) {
             selectableMask = [false, false, false, false, false, false];
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = false;
@@ -179,7 +215,7 @@ export default class c_DiceRunGame {
         } else {
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = false;
             if (this.ui.buttonBank) this.ui.buttonBank.disabled = this.currentRollScore <= 0;
-            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = false;
+            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = !canEndTurn;
             if (this.ui.buttonSelectAll) this.ui.buttonSelectAll.disabled = !this._anyTrue(selectableMask);
             if (this.ui.buttonEndTurn) {this.ui.buttonEndTurn.textContent = "End Turn";}
         }

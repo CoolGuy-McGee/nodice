@@ -32,16 +32,14 @@ export default class c_UIRenderer {
             const isBanked = !!bankedMask[i];
             diceImg[i].hidden = isBanked;
             if (!isBanked) {
-                
-                diceImg[i].lastElementChild.style.backgroundPosition = `-${diceValues[i]-1}00% 0%`;
-                // diceImg[i].firstChild.style. not really sure what do with this yet other than I need a conditional to set the background
-                const suffix = isSelected ? "selected" : "";
-                //diceImg[i].firstElementChild.classList.toggle(`${suffix}`);
-                diceImg[i].firstElementChild.classList.toggle('selected', isSelected);
-                //diceImg[i].firstElementChild.classList.contains('selected')
-                //? diceImg[i].firstElementChild.classList.add('selected')
-                //: diceImg[i].firstElementChild.classList.remove('selected');
-
+                // Remove [selected] suffix
+                diceButtons[i].textContent = `Die ${i + 1}: ${diceValues[i]}`;
+                // Selected dice: green
+                if (isSelected) {
+                    diceButtons[i].classList.add("selected");
+                } else {
+                    diceButtons[i].classList.remove("selected");
+                }
             }
         }
     }
@@ -49,10 +47,13 @@ export default class c_UIRenderer {
     _applyDiceEnabledMask(selectableMask) {
         const diceClicks = this._getDiceImg();
             // If the button is hidden (banked), ensure it is disabled as well
-            //diceButtons[i].disabled = diceButtons[i].hidden ? true : !selectableMask[i];
-        for (let i = 0; i < diceClicks.length && i < selectableMask.length; i++) {
-            //diceClicks[i].firstElementChild.disabled = diceClicks[i].hidden ? true : !selectableMask[i];
-            diceClicks[i].firstElementChild.classList.toggle('disabled', !selectableMask[i]); 
+            diceButtons[i].disabled = diceButtons[i].hidden ? true : !selectableMask[i];
+            // Grey out if not selectable
+            if (!selectableMask[i] || diceButtons[i].disabled) {
+                diceButtons[i].classList.add("dice-disabled");
+            } else {
+                diceButtons[i].classList.remove("dice-disabled");
+            }
         }
     }
 
