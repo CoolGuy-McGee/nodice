@@ -11,26 +11,26 @@ export default class c_UIRenderer {
         this.buttonSelectAll = document.getElementById("select-all-btn");
     }
 
-    _getDiceButtons() {
-        // Prefer explicit ids die-1..die-6 for deterministic ordering
+    _getDiceImg() {
+        // so this is going to be like _getDiceButtons, but instead with the nested <div> structure for imgs
         const byId = [];
         for (let i = 1; i <= 6; i++) {
-            const el = document.getElementById(`die-${i}`);
-            if (el) byId.push(el);
+            const dien = document.getElementsByClassName('dice-display')[i];
+            if (dien) byId.push(dien);
         }
         if (byId.length === 6) return byId;
 
-        // Fallback to buttons inside #dice-container (kept for compatibility)
         if (!this.containerDice) return [];
-        return Array.from(this.containerDice.querySelectorAll("button"));
+        return Array.from(this.containerDice.querySelectorAll(".dice-display"));
+        //this might not work
     }
 
     _renderDiceLabels(diceValues, selectedMask, bankedMask) {
-        const diceButtons = this._getDiceButtons();
-        for (let i = 0; i < diceButtons.length && i < diceValues.length; i++) {
+        const diceImg = this._getDiceImg();
+        for (let i = 0; i < diceImg.length && i < diceValues.length; i++) {
             const isSelected = !!selectedMask[i];
             const isBanked = !!bankedMask[i];
-            diceButtons[i].hidden = isBanked;
+            diceImg[i].hidden = isBanked;
             if (!isBanked) {
                 // Remove [selected] suffix
                 diceButtons[i].textContent = `Die ${i + 1}: ${diceValues[i]}`;
@@ -45,8 +45,7 @@ export default class c_UIRenderer {
     }
 
     _applyDiceEnabledMask(selectableMask) {
-        const diceButtons = this._getDiceButtons();
-        for (let i = 0; i < diceButtons.length && i < selectableMask.length; i++) {
+        const diceClicks = this._getDiceImg();
             // If the button is hidden (banked), ensure it is disabled as well
             diceButtons[i].disabled = diceButtons[i].hidden ? true : !selectableMask[i];
             // Grey out if not selectable
