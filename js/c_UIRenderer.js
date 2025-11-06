@@ -32,14 +32,14 @@ export default class c_UIRenderer {
             const isBanked = !!bankedMask[i];
             diceButtons[i].hidden = isBanked;
             if (!isBanked) {
-                const suffix = isSelected ? " [selected]" : "";
-                
-                diceButtons[i].textContent = `Die ${i + 1}: ${diceValues[i]}${suffix}`;
-                // change bg of selected dice
-                diceButtons[i].textContent.includes("[selected]")
-                    ? diceButtons[i].classList.add("selected")
-                    : diceButtons[i].classList.remove("selected");
-
+                // Remove [selected] suffix
+                diceButtons[i].textContent = `Die ${i + 1}: ${diceValues[i]}`;
+                // Selected dice: green
+                if (isSelected) {
+                    diceButtons[i].classList.add("selected");
+                } else {
+                    diceButtons[i].classList.remove("selected");
+                }
             }
         }
     }
@@ -49,6 +49,12 @@ export default class c_UIRenderer {
         for (let i = 0; i < diceButtons.length && i < selectableMask.length; i++) {
             // If the button is hidden (banked), ensure it is disabled as well
             diceButtons[i].disabled = diceButtons[i].hidden ? true : !selectableMask[i];
+            // Grey out if not selectable
+            if (!selectableMask[i] || diceButtons[i].disabled) {
+                diceButtons[i].classList.add("dice-disabled");
+            } else {
+                diceButtons[i].classList.remove("dice-disabled");
+            }
         }
     }
 
