@@ -38,6 +38,7 @@ export default class c_UIRenderer {
                 const suffix = isSelected ? "selected" : "";
                 //diceImg[i].firstElementChild.classList.toggle(`${suffix}`);
                 diceImg[i].firstElementChild.classList.toggle('selected', isSelected);
+                diceImg[i].lastElementChild.classList.toggle('selected', isSelected);
                 //diceImg[i].firstElementChild.classList.contains('selected')
                 //? diceImg[i].firstElementChild.classList.add('selected')
                 //: diceImg[i].firstElementChild.classList.remove('selected');
@@ -102,6 +103,7 @@ export default class c_UIRenderer {
         for (let i = 0; i < diceClicks.length && i < selectableMask.length; i++) {
             //diceClicks[i].firstElementChild.disabled = diceClicks[i].hidden ? true : !selectableMask[i];
             diceClicks[i].firstElementChild.classList.toggle('disabled', !selectableMask[i]); 
+            diceClicks[i].lastElementChild.classList.toggle('disabled', !selectableMask[i]); 
         }
     }
 
