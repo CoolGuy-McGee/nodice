@@ -60,11 +60,11 @@ body {
 .dice-color {
     background-color: white;
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 85%;
+    height: 85%;
+    margin: 7% 7% 7% 7%;
     /*background-image: url(assets/white.png); gonna update this later*/
     background-size: 50% 50%;
-    border-radius: 10%;
 }
 /* change color with class - if they exist might as well have them do something*/
 .dice-color.selected {background-color: lightgreen;}
