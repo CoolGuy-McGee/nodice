@@ -6,11 +6,45 @@
 //Artist: : Diffie Bosman
 
 
-// Audio (back-to-back, 'paperback' loops). Provide your own files under /assets
+// === Audio setup ===
 const entrance = new Audio("assets/nodice_entrance.mp3");
-const paperback = new Audio("assets/paperback.mp3");
-paperback.loop = true;
 
+// Menu music playlist
+const playlist = [
+  { src: "assets/paperback.mp3" },
+  // { src: "assets/another_song.mp3" },
+];
+let currentTrack = 0;
+const player = new Audio();
+player.preload = "auto";
+player.loop = (playlist.length === 1); // paperback loops if it's the only track
+
+// Keep looping/advancing
+player.addEventListener("ended", () => {
+  if (playlist.length > 1) {
+    currentTrack = (currentTrack + 1) % playlist.length;
+    player.src = playlist[currentTrack].src;
+    player.play().catch(err => console.warn("playlist play failed:", err));
+  } else {
+    // Safety loop for single-track case
+    player.currentTime = 0;
+    player.play().catch(err => console.warn("paperback replay failed:", err));
+  }
+});
+
+function startPlaylist() {
+  if (!playlist.length) return;
+  player.src = playlist[currentTrack].src;
+  player.currentTime = 0;
+  player.play().catch(err => console.warn("playlist play failed:", err));
+}
+
+// === Consent flag (persistent) ===
+const AUDIO_FLAG = "audioConsent";
+const hasAudioConsent = () => localStorage.getItem(AUDIO_FLAG) === "true";
+const setAudioConsent = () => { try { localStorage.setItem(AUDIO_FLAG, "true"); } catch {} };
+
+// === DOM ===
 const overlay = document.getElementById("start-overlay");
 const beginBtn = document.getElementById("begin");
 const logo = document.getElementById("logo");
@@ -19,65 +53,61 @@ const stage = document.getElementById("stage");
 let started = false;
 let entranceStarted = false;
 
-/** Fade the logo over 18s */
+/** Fade the logo in */
 function fadeInLogo() {
   logo.classList.remove("is-hidden", "instant");
-  void logo.offsetWidth; // ensure transition
+  void logo.offsetWidth;
   logo.classList.add("fade-in");
 }
 
-/** Show the logo instantly (no fade) */
+/** Instantly show logo */
 function showLogoInstant() {
   logo.classList.remove("is-hidden", "fade-in");
   logo.classList.add("instant");
 }
 
-/** Complete docking after fade completes */
+/** After fade completes, dock then reveal rest */
 logo.addEventListener("transitionend", (e) => {
   if (e.propertyName === "opacity") {
     document.body.classList.add("docked");
+    setTimeout(() => document.body.classList.add("ready"), 300); // after bounce
   }
 }, { passive: true });
 
 function hideOverlay() { overlay.classList.add("hidden"); }
 function showOverlay() { overlay.classList.remove("hidden"); }
 
-/** Hard skip to the menu: stop intro, show docked logo, start loop */
+/** Skip intro entirely */
 function skipToMenu() {
-  // Stop entrance immediately if it was playing
   try {
     entrance.pause();
-    // jump to end so 'ended' listeners won't fire later
     if (!isNaN(entrance.duration)) entrance.currentTime = entrance.duration;
   } catch {}
 
-  // Reveal logo instantly and dock UI
   showLogoInstant();
-  document.body.classList.add("docked");
+  document.body.classList.add("docked", "ready");
 
-  // Start the looping track
-  paperback.play().catch(err => console.warn("paperback play failed:", err));
+  setAudioConsent();        // gesture happened → persist consent
+  startPlaylist();
 
-  // Hide the overlay
   hideOverlay();
-
-  // Mark flow as started so we don’t double-handle input
   started = true;
   entranceStarted = false;
 }
 
-/** Normal flow: Play button -> fade + entrance -> paperback loop */
+/** Normal flow: Play -> entrance -> playlist */
 function startNormal() {
   if (started) return;
   started = true;
 
+  setAudioConsent();  // pressing Play grants/persists consent
   fadeInLogo();
 
   entrance.play()
     .then(() => {
       entranceStarted = true;
       entrance.addEventListener("ended", () => {
-        paperback.play().catch(err => console.warn("paperback play failed:", err));
+        startPlaylist();
       }, { once: true });
       hideOverlay();
     })
@@ -88,15 +118,10 @@ function startNormal() {
     });
 }
 
-/** Legacy skip entry point kept for compatibility */
-function skipIntro() {
-  // Always route to the robust skipper
-  skipToMenu();
-}
+/** Legacy alias */
+function skipIntro() { skipToMenu(); }
 
-/* Overlay click handling:
-   - Clicking the green button starts NORMAL flow.
-   - Clicking anywhere else on the overlay SKIPS the intro (at any time). */
+/* Overlay clicks */
 overlay.addEventListener("click", (e) => {
   const target = e.target;
   if (target && target.id === "begin") {
@@ -106,18 +131,18 @@ overlay.addEventListener("click", (e) => {
   }
 }, { capture: true });
 
-/* Keyboard shortcuts:
-   - Esc or 'S' to skip to menu at any time while overlay is visible. */
+/* Keyboard (while overlay visible) */
 document.addEventListener("keydown", (e) => {
   if (overlay && !overlay.classList.contains("hidden")) {
-    if (e.key === "Escape" || e.key.toLowerCase() === "s") {
+    const k = e.key;
+    if (k === "Escape" || (typeof k === "string" && k.toLowerCase() === "s")) {
       e.preventDefault();
       skipToMenu();
     }
   }
 });
 
-/* Accessibility: allow Enter/Space on the Play button to start normal flow */
+/* Play via Enter/Space on the button */
 beginBtn.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") {
     e.preventDefault();
@@ -125,31 +150,27 @@ beginBtn.addEventListener("keydown", (e) => {
   }
 });
 
-/* Pause/resume on tab hide/show (optional) */
+/* Pause/resume with tab visibility; resume only if consent persisted */
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     entrance.pause();
-    paperback.pause();
-  } else {
-    // Resume whichever track is appropriate (no persisted state)
-    if (started) {
-      // If we were mid-intro and not ended, prefer entrance; otherwise paperback
-      if (entranceStarted && !entrance.ended) {
-        entrance.play().catch(() => {});
-      } else {
-        paperback.play().catch(() => {});
-      }
+    player.pause();
+  } else if (started && hasAudioConsent()) {
+    if (entranceStarted && !entrance.ended) {
+      entrance.play().catch(() => {});
+    } else {
+      player.play().catch(() => {});
     }
   }
 });
 
-/* Always show overlay on load (no persistence) */
+/* Initial overlay (no intro/menu persistence) */
 window.addEventListener("DOMContentLoaded", () => {
   overlay.classList.remove("hidden");
 });
 
-/* Clean up on unload (optional) */
+/* Cleanup */
 window.addEventListener("beforeunload", () => {
   entrance.pause();
-  paperback.pause();
+  player.pause();
 });
