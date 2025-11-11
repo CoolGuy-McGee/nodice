@@ -53,10 +53,35 @@
   <div id="message"></div>
 
   <!-- JS Module Imports -->
-  <script type="module">
-    import c_DiceRunGame from "./js/c_DiceRunGame.js";
-    const game = new c_DiceRunGame();
-    window.game = game; // optional for debugging
-  </script>
+<div id="players"></div>
+...
+<script type="module">
+  import c_DiceRunGame from "./js/c_DiceRunGame.js";
+  import c_PlayerHandler from "./js/c_PlayerHandler.js";
+
+  const game = new c_DiceRunGame();
+  const players = new c_PlayerHandler({ maxPlayers: 160, requestedPlayers: 160 });
+  players._attach("#players"); // renders 2 player boxes
+
+  // OPTIONAL: lightweight wiring so player totals mirror turns.
+  // If you want automated updates, you can patch these two:
+  const _origBank = game._onBank.bind(game);
+  game._onBank = (evt) => {
+    // track best single selection this turn
+    if (game.currentRollScore > 0) players._recordProvisionalRoll(game.currentRollScore);
+    _origBank(evt);
+  };
+  const _origEnd = game._onEndTurn.bind(game);
+  game._onEndTurn = (evt) => {
+    // commit the run to the active player, then pass the turn
+    players._commitPendingTurn(game.runScore);
+    _origEnd(evt);
+    players._nextPlayer();
+    // keep the big score readout in your UIRenderer; no conflict
+  };
+
+  window.game = game; window.players = players; // optional for debugging
+</script>
+  
 </body>
 </html>

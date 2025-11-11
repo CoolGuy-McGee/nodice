@@ -104,3 +104,37 @@ body {
     to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* append to css/style.css or a small new css file */
+#players.players-wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-block: 10px 16px;
+}
+
+.player-card {
+  --pc-bg: #1e90ff;
+  --pc-fg: #ffffff;
+  --pc-border: #0f5fb3;
+  background: linear-gradient(0deg, color-mix(in oklab, var(--pc-bg) 86%, #000 0%), var(--pc-bg));
+  color: var(--pc-fg);
+  border: 2px solid var(--pc-border);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  padding: 10px 12px;
+}
+
+.player-card .player-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 1.02rem;
+}
+.player-card .dot {
+  width: 10px; height: 10px; border-radius: 999px; background: var(--pc-fg); opacity: .9;
+}
+.player-card .active-tag { margin-left: auto; filter: drop-shadow(0 0 3px rgba(0,0,0,.35)); }
+.player-card[style*="--pc-active: 1"] { outline: 3px solid rgba(255,255,255,.55); }
+
+.player-card .player-body { margin-top: 8px; display: grid; gap: 6px; }
+.player-card .row { display: flex; justify-content: space-between; }
+.player-card .label { opacity: .9; }
+.player-card .value { font-weight: 700; }
