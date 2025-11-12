@@ -84,23 +84,32 @@ export default class c_DiceRunGame {
             const anySelectable = this._anyTrue(preSelectableMask);
 
             if (!anySelectable) {
-                // else. farkle if there are dice on the table that are not banked.
-                // if ALL dice are banked that's hot dice (allow roll).
                 if (!allBanked) {
+                    // Farkle branch: freeze for 2s, disable both buttons, then end turn.
                     this.currentRollScore = 0;
                     this.runScore = 0;
                     this.mustBankBeforeReroll = false;
                     this.endTurnConfirmPending = false;
                     this.audio?._playSfx("noDice");
-                    this.ui?.buttonRoll.disabled;
-                    this._refreshUI(undefined, 0, "Farkle. Turn ends.");
-                    this._onEndTurn(evt);
+
+                    // freeze flags & UI
+                    this._farkleFreeze = true;
+                    if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
+                    if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
+                    this._refreshUI(undefined, 0, "Farkle! Please wait…");
+
+                    // handoff after 2 seconds
+                    clearTimeout(this._farkleT);
+                    this._farkleT = setTimeout(() => {
+                        this._farkleFreeze = false;
+                        this._onEndTurn({ reason: "farkle-timeout" });
+                    }, 2000);
                     return;
                 }
-                // hot dice: fall through and allow roll (optional sting)
+                // hot dice: allow roll
                 this.audio?._playSfx("hotDice");
             } else {
-                // something selectable → must bank first
+                // something selectable -- must bank first
                 this.ui?._showHelpBubbleNearEvent?.(evt, "You must bank at least one scoring die before rolling again.");
                 this.audio?._playSfx("notAllowed");
                 return;
@@ -127,21 +136,30 @@ export default class c_DiceRunGame {
 
         const selectableMask = this._computeSelectableMaskConsideringBanked();
         if (!this._anyTrue(selectableMask)) {
-            // post-roll dead roll (farkle)
+            // post-roll farkle: same 2s freeze behavior
             this.currentRollScore = 0;
             this.runScore = 0;
             this.mustBankBeforeReroll = false;
             this.endTurnConfirmPending = false;
             this.audio?._playSfx("noDice");
-            this._refreshUI(resultObject.patternKey, resultObject.score, "Farkle. Turn ends.");
-            this._onEndTurn(evt);
+
+            this._farkleFreeze = true;
+            if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
+            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
+            this._refreshUI(resultObject.patternKey, resultObject.score, "Farkle! Please wait…");
+
+            clearTimeout(this._farkleT);
+            this._farkleT = setTimeout(() => {
+                this._farkleFreeze = false;
+                this._onEndTurn({ reason: "farkle-timeout" });
+            }, 2000);
             return;
         }
 
-        // Successful roll (something selectable exists)
+        // Successful roll
         const selectableMaskAmount = selectableMask
-        .map((val, idx) => (val === true ? idx : null))
-        .filter(idx => idx !== null);
+            .map((val, idx) => (val === true ? idx : null))
+            .filter(idx => idx !== null);
 
         this.audio?._playSfx("diceRoll");
         this.audio?._playDiceSuccessForSelectable(selectableMaskAmount.length);
@@ -226,7 +244,10 @@ export default class c_DiceRunGame {
     }
 
     _onEndTurn(evt) {
-        this.audio?._playSfx("buttonClick")
+        // If a farkle freeze is active, ignore any accidental/early end-turns
+        if (this._farkleFreeze && !(evt && evt.reason === "farkle-timeout")) return;
+
+        this.audio?._playSfx("buttonClick");
         if (!this.hasRolledAtLeastOnce) return;
 
         const base = (this.firstRunThreshold ?? (DICE_SCORES.first_run_min ?? 300));
@@ -262,6 +283,7 @@ export default class c_DiceRunGame {
         this.mustBankBeforeReroll = false;
         this.endTurnConfirmPending = false;
 
+        // End of turn: UI will naturally re-enable Roll; End Turn depends on hotDice (now false)
         this._refreshUI(undefined, undefined, "Turn ended. Total updated.");
     }
 
@@ -285,22 +307,33 @@ export default class c_DiceRunGame {
     _refreshUI(mostRecentPatternKey, mostRecentPatternScore, overrideMessage) {
         let selectableMask = this._computeSelectableMaskConsideringBanked();
 
+        const isHotDice = Array.isArray(this.bankedDiceMask) &&
+            this.bankedDiceMask.length === 6 &&
+            this.bankedDiceMask.every(Boolean);
+
         if (!this.hasRolledAtLeastOnce) {
             selectableMask = [false, false, false, false, false, false];
-            if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = this._anyTrue(selectableMask);
+            if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = false;
             if (this.ui.buttonBank) this.ui.buttonBank.disabled = true;
             if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = false;
             if (this.ui.buttonSelectAll) this.ui.buttonSelectAll.disabled = true;
         } else {
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = false;
             if (this.ui.buttonBank) this.ui.buttonBank.disabled = this.currentRollScore <= 0;
-            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = false;
+            // Disable End Turn when hot dice must be rolled again
+            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = !!isHotDice;
             if (this.ui.buttonSelectAll) this.ui.buttonSelectAll.disabled = !this._anyTrue(selectableMask);
             if (this.ui.buttonEndTurn) { this.ui.buttonEndTurn.textContent = "End Turn"; }
             if (this.ui.buttonSelectAll) {
                 const allSelectableAlreadySelected = selectableMask.every((v, i) => !v || this.selectedDiceMask[i]);
                 this.ui.buttonSelectAll.textContent = allSelectableAlreadySelected ? "Deselect All" : "Select All";
             }
+        }
+
+        // If a farkle freeze is active, keep both controls disabled regardless
+        if (this._farkleFreeze) {
+            if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
+            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
         }
 
         this.ui._applyDiceEnabledMask(selectableMask);

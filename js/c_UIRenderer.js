@@ -91,6 +91,15 @@ export default class c_UIRenderer {
         }
     }
 
+    _onFarkle() {
+    // Disable roll immediately when Farkle occurs
+    if (this.rollBtn) this.rollBtn.disabled = true;
+
+    // Optional: give user feedback
+    const msg = document.querySelector("#message");
+    if (msg) msg.textContent = "Farkle! You must end your turn.";
+}
+
     _setScoreDisplay(currentRollScore, runScore, totalScore) {
         if (this.containerScore) this.containerScore.textContent = String(currentRollScore);
         if (this.containerRunScore) this.containerRunScore.textContent = String(runScore);

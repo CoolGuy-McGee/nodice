@@ -65,7 +65,7 @@ body {
 }
 /* change color with class - if they exist might as well have them do something*/
 .selected {background-color: lightgreen;}
-.disabled {background-color: lightgray;}
+.disabled {background-color: lightgray; cursor: not-allowed;}
 
 .dice-numb {
     position: absolute;
@@ -138,3 +138,20 @@ body {
 .player-card .row { display: flex; justify-content: space-between; }
 .player-card .label { opacity: .9; }
 .player-card .value { font-weight: 700; }
+
+button:disabled,
+button[disabled] {
+    cursor: not-allowed;
+}
+
+button:disabled:hover,
+button[disabled]:hover {
+    cursor: not-allowed;
+}
+
+.dice-display[disabled],
+.dice-display:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    filter: grayscale(50%);
+}
