@@ -406,6 +406,6 @@ export default class c_DiceRunGame {
                 : (!this.hasRolledAtLeastOnce ? "Waiting for first roll…" : ""));
 
         this.ui._setMessage(baseMessage);
-        this.ui._setScoreDisplay(this.currentRollScore, this.runScore, this.totalScore);
+        this.ui._setScoreDisplay(this.currentRollScore, this.runScore, this.players._players[this.players._active].totalScore);
     }
 }
