@@ -107,6 +107,10 @@ export default class c_DiceRunGame {
                     this._farkleFreeze = true;
                     if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
                     if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
+
+                    // set visual farkle state
+                    this.ui?._setFarkleVisual?.(true);
+
                     this._refreshUI(undefined, 0, "Farkle! Please wait…");
 
                     // handoff after 2 seconds
@@ -158,6 +162,10 @@ export default class c_DiceRunGame {
             this._farkleFreeze = true;
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
             if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
+
+            // set visual farkle state
+            this.ui?._setFarkleVisual?.(true);
+
             this._refreshUI(resultObject.patternKey, resultObject.score, "Farkle! Please wait…");
 
             clearTimeout(this._farkleT);
@@ -167,6 +175,9 @@ export default class c_DiceRunGame {
             }, 2000);
             return;
         }
+
+        // Successful roll -> clear any farkle visual
+        this.ui?._setFarkleVisual?.(false);
 
         // Successful roll
         const selectableMaskAmount = selectableMask
@@ -273,6 +284,9 @@ export default class c_DiceRunGame {
             this.mustBankBeforeReroll = false;
             this.endTurnConfirmPending = false;
 
+            // clear visual farkle state
+            this.ui?._setFarkleVisual?.(false);
+
             this._refreshUI(undefined, undefined, "Farkle! Turn ended.");
 
             // reset flag so next farkle will play its SFX
@@ -322,6 +336,9 @@ export default class c_DiceRunGame {
 
         // reset farkle SFX guard at end of a normal turn as well
         this._farkleSfxPlayed = false;
+
+        // ensure farkle visuals cleared on normal end-turn as well
+        this.ui?._setFarkleVisual?.(false);
     }
 
     _recomputeSelectedScore() {

@@ -158,4 +158,11 @@ export default class c_UIRenderer {
             box.classList.add("hidden");
         }
     }
+
+    // Add: visual farkle toggle — applies/removes .farkle on the dice container
+    _setFarkleVisual(on = false) {
+        if (!this.containerDice) return;
+        if (on) this.containerDice.classList.add("farkle");
+        else this.containerDice.classList.remove("farkle");
+    }
 }

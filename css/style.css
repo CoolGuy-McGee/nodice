@@ -76,6 +76,16 @@ body {
     /*bacground-position: -700% 0% this'll be a blank die for the start*/
 }
 
+/* Visual treatment when a farkle is active: tint dice red */
+#dice-container.farkle .dice-color {
+    background-color: #ff6b6b !important;
+    box-shadow: 0 0 8px rgba(255,100,100,0.6);
+}
+#dice-container.farkle .dice-numb {
+    filter: saturate(0.8) contrast(1.05);
+    opacity: 0.95;
+}
+
 /* Fancy smancy info box to show erros and such in */
 #message {
     position: fixed;
