@@ -30,6 +30,9 @@ export default class c_DiceRunGame {
         this.generator = null;
         this.audio = null;
 
+        // track whether we've already played the farkle (noDice) sfx for the current farkle event
+        this._farkleSfxPlayed = false;
+
         this._initialize();
         this._wireUIEvents();
     }
@@ -73,6 +76,13 @@ export default class c_DiceRunGame {
         }
     }
 
+    // Play the farkle/no-dice SFX only once per farkle event
+    _playFarkleSfxOnce() {
+        if (this._farkleSfxPlayed) return;
+        this._farkleSfxPlayed = true;
+        this.audio?._playSfx("noDice");
+    }
+
     _onRoll(evt) {
         if (!this.hasRolledAtLeastOnce) {
             this.mustBankBeforeReroll = false; // first roll should never be blocked
@@ -90,7 +100,8 @@ export default class c_DiceRunGame {
                     this.runScore = 0;
                     this.mustBankBeforeReroll = false;
                     this.endTurnConfirmPending = false;
-                    this.audio?._playSfx("noDice");
+                    // play no-dice once
+                    this._playFarkleSfxOnce();
 
                     // freeze flags & UI
                     this._farkleFreeze = true;
@@ -141,7 +152,8 @@ export default class c_DiceRunGame {
             this.runScore = 0;
             this.mustBankBeforeReroll = false;
             this.endTurnConfirmPending = false;
-            this.audio?._playSfx("noDice");
+            // play no-dice once
+            this._playFarkleSfxOnce();
 
             this._farkleFreeze = true;
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
@@ -244,9 +256,31 @@ export default class c_DiceRunGame {
     }
 
     _onEndTurn(evt) {
-        // If a farkle freeze is active, ignore any accidental/early end-turns
+        // If a farkle freeze is active, ignore accidental/early end-turns
         if (this._farkleFreeze && !(evt && evt.reason === "farkle-timeout")) return;
 
+        // ---- FAST PATH FOR FARKLE (no confirmation, immediate end) ----
+        if (evt && (evt.reason === "farkle" || evt.reason === "farkle-timeout")) {
+            // Ensure turn ends cleanly on farkle without triggering first-run confirmation
+            // play no-dice once (will be a no-op if already played)
+            this._playFarkleSfxOnce();
+
+            this.runScore = 0;
+            this.currentRollScore = 0;
+            this.bankedDiceMask = [false, false, false, false, false, false];
+            this.selectedDiceMask = [false, false, false, false, false, false];
+            this.hasRolledAtLeastOnce = false;
+            this.mustBankBeforeReroll = false;
+            this.endTurnConfirmPending = false;
+
+            this._refreshUI(undefined, undefined, "Farkle! Turn ended.");
+
+            // reset flag so next farkle will play its SFX
+            this._farkleSfxPlayed = false;
+            return;
+        }
+
+        // Normal end-turn behavior
         this.audio?._playSfx("buttonClick");
         if (!this.hasRolledAtLeastOnce) return;
 
@@ -285,6 +319,9 @@ export default class c_DiceRunGame {
 
         // End of turn: UI will naturally re-enable Roll; End Turn depends on hotDice (now false)
         this._refreshUI(undefined, undefined, "Turn ended. Total updated.");
+
+        // reset farkle SFX guard at end of a normal turn as well
+        this._farkleSfxPlayed = false;
     }
 
     _recomputeSelectedScore() {
