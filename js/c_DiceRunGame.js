@@ -284,6 +284,9 @@ export default class c_DiceRunGame {
             this.mustBankBeforeReroll = false;
             this.endTurnConfirmPending = false;
 
+            // reset visible dice to initial "1" state for next player
+            this.latestDiceValues = [1,1,1,1,1,1];
+
             // clear visual farkle state
             this.ui?._setFarkleVisual?.(false);
 
@@ -330,6 +333,9 @@ export default class c_DiceRunGame {
         this.hasRolledAtLeastOnce = false;
         this.mustBankBeforeReroll = false;
         this.endTurnConfirmPending = false;
+
+        // ensure the next player's starting dice display shows ones (greyed)
+        this.latestDiceValues = [1,1,1,1,1,1];
 
         // End of turn: UI will naturally re-enable Roll; End Turn depends on hotDice (now false)
         this._refreshUI(undefined, undefined, "Turn ended. Total updated.");
