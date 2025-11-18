@@ -49,12 +49,12 @@ body {
 .dice-display {
     /*w:48 h:48*/
     /*if the scallings are feeling off, just change them back to the ones listed here*/
-    width: 4%;
     height: 100%;
     position: relative;
     flex: 0 0 auto;
     image-rendering: pixelated;
     margin: 0px 0px 2px 2px;
+    aspect-ratio: 1/1;
 }
 
 .dice-display:hover {transform: scale(1.1);}
