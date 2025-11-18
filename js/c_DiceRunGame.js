@@ -5,7 +5,7 @@ import c_PatternBasedDiceGenerator from "./c_PatternBasedDiceGenerator.js";
 import c_SelectionManager from "./c_SelectionManager.js";
 import c_UIRenderer from "./c_UIRenderer.js";
 import c_AudioHandler from "./c_AudioHandler.js";
-import c_PlayerHandler from "./c_playerHandler.js";
+import c_PlayerHandler from "./c_PlayerHandler.js";
 
 export default class c_DiceRunGame {
     constructor() {
