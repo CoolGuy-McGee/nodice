@@ -1,5 +1,5 @@
 :root {
-  --fade-duration: 9.8s;
+  --fade-duration: 2.0s;
   --stage-padding-top: 28px;
   --bg: linear-gradient(135deg, var(--carolina-blue), var(--hot-pink), var(--vermilion));
   --fg: #fff;

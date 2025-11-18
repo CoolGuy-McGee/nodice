@@ -87,7 +87,9 @@ export default class c_UIRenderer {
     _applyDiceEnabledMask(selectableMask) {
         const diceClicks = this._getDiceImg();
         for (let i = 0; i < diceClicks.length && i < selectableMask.length; i++) {
+            diceClicks[i].classList.toggle('disabled', !selectableMask[i]); 
             diceClicks[i].firstElementChild.classList.toggle('disabled', !selectableMask[i]); 
+            diceClicks[i].lastElementChild.classList.toggle('disabled', !selectableMask[i]); 
         }
     }
 

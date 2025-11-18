@@ -1,4 +1,4 @@
-import c_initialize from "./c_initialize.js";
+import c_initialize from "./c_Initialize.js";
 
 export default class c_gameStart {
     constructor() {
