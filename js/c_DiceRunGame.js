@@ -5,6 +5,7 @@ import c_PatternBasedDiceGenerator from "./c_PatternBasedDiceGenerator.js";
 import c_SelectionManager from "./c_SelectionManager.js";
 import c_UIRenderer from "./c_UIRenderer.js";
 import c_AudioHandler from "./c_AudioHandler.js";
+import c_PlayerHandler from "./c_playerHandler.js";
 
 export default class c_DiceRunGame {
     constructor() {
@@ -12,11 +13,11 @@ export default class c_DiceRunGame {
         this.probabilityModel = new c_DiceProbabilityModel(this.classifier);
         this.ui = new c_UIRenderer();
         this.selectionManager = new c_SelectionManager();
+        this.players = new c_PlayerHandler();
 
         this.latestDiceValues = [1, 1, 1, 1, 1, 1];
         this.selectedDiceMask = [false, false, false, false, false, false];
         this.bankedDiceMask = [false, false, false, false, false, false];
-
         this.currentRollScore = 0;
         this.runScore = 0;
         this.totalScore = 0;
@@ -406,6 +407,6 @@ export default class c_DiceRunGame {
                 : (!this.hasRolledAtLeastOnce ? "Waiting for first roll…" : ""));
 
         this.ui._setMessage(baseMessage);
-        this.ui._setScoreDisplay(this.currentRollScore, this.runScore, this.players._players[this.players._active].totalScore);
+        this.ui._setScoreDisplay(this.currentRollScore, this.runScore, this.players._getActivePlayer.totalScore);
     }
 }
