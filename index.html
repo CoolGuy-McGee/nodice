@@ -27,11 +27,56 @@
       <div class="modal-backdrop" data-dismiss="modal" tabindex="-1"></div>
       <div class="modal-dialog" role="document" aria-describedby="options-desc">
         <h2 id="options-title">Options</h2>
+
+        <!-- Tabs -->
+        <nav class="options-tabs" role="tablist" aria-label="Options Tabs">
+          <button type="button" class="tab-btn active" data-tab="dice-scores" role="tab" aria-selected="true">Dice Scores</button>
+          <button type="button" class="tab-btn" data-tab="placeholder" role="tab" aria-selected="false">Other</button>
+        </nav>
+
         <div id="options-desc" class="modal-body">
-          <p>Options will be added here.</p>
+          <!-- Dice Scores panel -->
+          <section id="dice-scores-panel" class="options-panel" role="tabpanel">
+            <form id="dice-scores-form">
+              <p>Adjust scoring values used by the custom dice run game.</p>
+
+              <div class="field-row"><label for="one_5">Single 5</label><input id="one_5" name="one_5" type="number" min="0" step="10" value="50"></div>
+              <div class="field-row"><label for="one_1">Single 1</label><input id="one_1" name="one_1" type="number" min="0" step="10" value="100"></div>
+
+              <fieldset>
+                <legend>Three of a kind</legend>
+                <div class="field-row"><label for="three_1">Three 1s</label><input id="three_1" name="three_1" type="number" min="0" step="50" value="1000"></div>
+                <div class="field-row"><label for="three_2">Three 2s</label><input id="three_2" name="three_2" type="number" min="0" step="50" value="200"></div>
+                <div class="field-row"><label for="three_3">Three 3s</label><input id="three_3" name="three_3" type="number" min="0" step="50" value="300"></div>
+                <div class="field-row"><label for="three_4">Three 4s</label><input id="three_4" name="three_4" type="number" min="0" step="50" value="400"></div>
+                <div class="field-row"><label for="three_5">Three 5s</label><input id="three_5" name="three_5" type="number" min="0" step="50" value="500"></div>
+                <div class="field-row"><label for="three_6">Three 6s</label><input id="three_6" name="three_6" type="number" min="0" step="50" value="600"></div>
+              </fieldset>
+
+              <div class="field-row"><label for="four_any">Four of a kind</label><input id="four_any" name="four_any" type="number" min="0" step="50" value="1000"></div>
+              <div class="field-row"><label for="five_any">Five of a kind</label><input id="five_any" name="five_any" type="number" min="0" step="50" value="2000"></div>
+              <div class="field-row"><label for="six_any">Six of a kind</label><input id="six_any" name="six_any" type="number" min="0" step="50" value="3000"></div>
+              <div class="field-row"><label for="straight">Straight (1-6)</label><input id="straight" name="straight" type="number" min="0" step="50" value="1500"></div>
+              <div class="field-row"><label for="two_triplets">Two triplets</label><input id="two_triplets" name="two_triplets" type="number" min="0" step="50" value="2500"></div>
+              <div class="field-row"><label for="four_any_w_pair">Four + pair</label><input id="four_any_w_pair" name="four_any_w_pair" type="number" min="0" step="50" value="2500"></div>
+
+              <div class="field-row"><label for="first_run_min">First run minimum</label><input id="first_run_min" name="first_run_min" type="number" min="0" step="50" value="300"></div>
+
+              <div class="modal-actions">
+                <button type="button" id="reset-dice-scores">Reset Defaults</button>
+                <button type="button" id="save-dice-scores">Save</button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Placeholder panel -->
+          <section id="placeholder" class="options-panel" role="tabpanel" hidden>
+            <p>Other options will go here.</p>
+          </section>
         </div>
-        <div class="modal-actions">
-          <button id="close-options" type="button">Close</button>
+
+        <div class="modal-actions" style="margin-top:10px;">
+          <button id="close-options-bottom" type="button">Close</button>
         </div>
       </div>
     </div>

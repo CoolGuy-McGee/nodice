@@ -103,6 +103,12 @@ button.selected {
     position: fixed;
     inset: 0;
     z-index: 1000;
+
+    /* ensure modal can provide its own scroll area when viewport is small/zoomed */
+    display: flex;
+    align-items: flex-start; /* keep dialog near top like a typical modal */
+    justify-content: center;
+    padding: 24px; /* spacing so dialog isn't flush to edges */
 }
 
 /* dark background only, no blur */
@@ -112,17 +118,27 @@ button.selected {
     background: rgba(0,0,0,0.5); /* just darker, no blur */
 }
 
-/* simple centered dialog */
+/* simple centered dialog, but allow internal scrolling if content exceeds viewport */
 .modal-dialog {
     position: relative;
     z-index: 1001;
-    margin: 15vh auto 0;
     max-width: 380px;
+    width: calc(100% - 48px); /* respect page padding */
     background: rgba(255,255,255,0.95);
     border-radius: 10px;
     padding: 16px 18px 14px;
     text-align: left;
     box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+
+    /* make dialog vertically scrollable if it's too tall for the viewport */
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* let the modal body flow normally, but keep spacing */
+.modal-body {
+    margin-bottom: 8px;
 }
 
 .modal-body p {
@@ -133,3 +149,36 @@ button.selected {
 .modal-actions {
     text-align: right;
 }
+
+/* Ensure the HTML "hidden" attribute actually hides the modal (author CSS can override UA styles) */
+.modal[hidden] {
+  display: none !important;
+}
+
+.options-tabs { display:flex; gap:8px; margin-bottom:10px; }
+.options-tabs .tab-btn {
+  padding:6px 10px;
+  border-radius:6px;
+  border:1px solid rgba(0,0,0,0.15);
+  background: rgba(0,0,0,0.04);
+  font-weight:600;
+}
+.options-tabs .tab-btn.active {
+  background: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.options-panel { margin-top:8px; }
+
+.field-row {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.field-row label { flex:1; font-size:0.95rem; }
+.field-row input { width:110px; padding:6px 8px; border-radius:6px; border:1px solid #aaa; text-align:right; }
+
+/* Keep modal button spacing readable */
+.modal-actions button { margin-left:8px; }

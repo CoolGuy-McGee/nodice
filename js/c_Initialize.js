@@ -1,4 +1,5 @@
 import c_DiceRunGame from "./c_DiceRunGame.js";
+import c_DiceRunGameCustom from "./c_DiceRunGameCustom.js";
 import c_PlayerHandler from "./c_PlayerHandler.js";
 
 export default class c_initialize {
@@ -16,7 +17,11 @@ export default class c_initialize {
     }
 
     run() {
-        this.game = new c_DiceRunGame();
+        // choose game implementation based on opts.useCustom
+        const GameClass = this.opts.useCustom ? c_DiceRunGameCustom : c_DiceRunGame;
+        // allow passing custom options in opts.customOptions in future
+        this.game = new GameClass(this.opts.customOptions || {});
+
         this.players = new c_PlayerHandler({ requestedPlayers: this.opts.requestedPlayers || 2 });
 
         this.players._attach(this.$playersWrapSel, this.$titleSel, true);
@@ -27,6 +32,8 @@ export default class c_initialize {
         this._wirePlayerProgression();
         this._patchFarkleFlow();
         this._patchEndTurnMinimumRule();
+
+        if (typeof this._postInit === "function") this._postInit();
     }
 
     _wirePlayerProgression() {
