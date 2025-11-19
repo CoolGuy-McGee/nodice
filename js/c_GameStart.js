@@ -7,7 +7,7 @@ export default class c_gameStart {
 
     start() {
         this._init = new c_initialize({
-            requestedPlayers: 16 // put player var here (it's only 2 as a placeholder)
+            requestedPlayers: 4 // default to 4 players
         });
         this._init.run();
     }
