@@ -14,8 +14,13 @@
     <script type="module">
         import c_gameStart from "./js/c_GameStart.js";
 
-        // This single line starts the entire initialization chain.
-        new c_gameStart().start();
+        // read player count from query string and pass to game start
+        const params = new URLSearchParams(window.location.search);
+        let players = parseInt(params.get("players"), 10);
+        if (!Number.isFinite(players) || players < 1) players = 4;
+        if (players > 16) players = 16;
+
+        new c_gameStart().start(players);
     </script>
 </head>
 <body>

@@ -5,9 +5,12 @@ export default class c_gameStart {
         this._init = null;
     }
 
-    start() {
+    // Accept an optional playerCount and forward it to Initialize
+    start(playerCount) {
+        const n = Number.isFinite(playerCount) ? Math.max(1, Math.floor(playerCount)) : 4;
+        const capped = Math.min(16, n); // keep within expected bounds
         this._init = new c_initialize({
-            requestedPlayers: 4 // default to 4 players
+            requestedPlayers: capped
         });
         this._init.run();
     }
