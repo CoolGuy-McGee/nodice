@@ -1,0 +1,135 @@
+:root {
+    /* reuse game colors (copied from style.css, kept simple) */
+    --dun: #d6cbb7ff;
+    --carolina-blue: #7bb4d3ff;
+    --charcoal: #344055ff;
+    --hot-pink: #f564a9ff;
+    --vermilion: #f24236ff;
+}
+
+/* basic reset-ish */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, var(--carolina-blue), var(--hot-pink), var(--vermilion));
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: var(--charcoal);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* prevent background scrolling when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+#main-menu {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px 16px;
+}
+
+/* simple heading similar vibe */
+#menu-title {
+    margin-top: 24px;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+
+#menu-desc {
+    margin-bottom: 18px;
+}
+
+#menu-form {
+    background: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 16px 18px 20px;
+    display: inline-block;
+    text-align: left;
+    min-width: 260px;
+}
+
+/* labels & input */
+label[for="player-count"] {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+#player-count {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    font-size: 1rem;
+    margin-bottom: 14px;
+}
+
+/* buttons: copy spirit of style.css (simple) */
+button {
+    margin-bottom: 1%;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #222;
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* crude selected style if ever used */
+button.selected {
+    background-color: #39b93996;
+    border: 3px solid black;
+}
+
+/* === Modal styling === */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+/* dark background only, no blur */
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5); /* just darker, no blur */
+}
+
+/* simple centered dialog */
+.modal-dialog {
+    position: relative;
+    z-index: 1001;
+    margin: 15vh auto 0;
+    max-width: 380px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 10px;
+    padding: 16px 18px 14px;
+    text-align: left;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.modal-body p {
+    margin-top: 6px;
+    margin-bottom: 12px;
+}
+
+.modal-actions {
+    text-align: right;
+}

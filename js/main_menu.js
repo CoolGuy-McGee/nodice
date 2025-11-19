@@ -1,176 +1,73 @@
-//SLight Breeze by Kaden Hansen
-//License: All Rights Reserved ©
+document.addEventListener("DOMContentLoaded", () => {
+  // Basic wiring: send player count to game.html via query param.
+  const startBtn = document.getElementById('start-game');
+  const optionsBtn = document.getElementById('options-btn');
+  const closeOptions = document.getElementById('close-options');
+  const modal = document.getElementById('options-modal');
+  const modalBackdrop = modal ? modal.querySelector('.modal-backdrop') : null;
+  const playerInput = document.getElementById('player-count');
 
-//Paperback by Bensound.com
-//License code: WDELTECG6IBXAHH1
-//Artist: : Diffie Bosman
-
-
-// === Audio setup === NOT WRITTEN YET
-const entrance = new Audio("assets/audio/music/slight_breeze.wav");
-
-// Menu music playlist
-const playlist = [
-  { src: "assets/audio/music/paperback.mp3" },
-  // { src: "assets/another_song.mp3" },
-];
-let currentTrack = 0;
-const player = new Audio();
-player.preload = "auto";
-player.loop = (playlist.length === 1); // paperback loops if it's the only track
-
-// Keep looping/advancing
-player.addEventListener("ended", () => {
-  if (playlist.length > 1) {
-    currentTrack = (currentTrack + 1) % playlist.length;
-    player.src = playlist[currentTrack].src;
-    player.play().catch(err => console.warn("playlist play failed:", err));
-  } else {
-    // Safety loop for single-track case
-    player.currentTime = 0;
-    player.play().catch(err => console.warn("paperback replay failed:", err));
-  }
-});
-
-function startPlaylist() {
-  if (!playlist.length) return;
-  player.src = playlist[currentTrack].src;
-  player.currentTime = 0;
-  player.play().catch(err => console.warn("playlist play failed:", err));
-}
-
-// === Consent flag (persistent) ===
-const AUDIO_FLAG = "audioConsent";
-const hasAudioConsent = () => localStorage.getItem(AUDIO_FLAG) === "true";
-const setAudioConsent = () => { try { localStorage.setItem(AUDIO_FLAG, "true"); } catch {} };
-
-// === DOM ===
-const overlay = document.getElementById("start-overlay");
-const beginBtn = document.getElementById("begin");
-const logo = document.getElementById("logo");
-const stage = document.getElementById("stage");
-
-let started = false;
-let entranceStarted = false;
-
-/** Fade the logo in */
-function fadeInLogo() {
-  logo.classList.remove("is-hidden", "instant");
-  void logo.offsetWidth;
-  logo.classList.add("fade-in");
-}
-
-/** Instantly show logo */
-function showLogoInstant() {
-  logo.classList.remove("is-hidden", "fade-in");
-  logo.classList.add("instant");
-}
-
-/** After fade completes, dock then reveal rest */
-logo.addEventListener("transitionend", (e) => {
-  if (e.propertyName === "opacity") {
-    document.body.classList.add("docked");
-    setTimeout(() => document.body.classList.add("ready"), 300); // after bounce
-  }
-}, { passive: true });
-
-function hideOverlay() { overlay.classList.add("hidden"); }
-function showOverlay() { overlay.classList.remove("hidden"); }
-
-/** Skip intro entirely */
-function skipToMenu() {
-  try {
-    entrance.pause();
-    if (!isNaN(entrance.duration)) entrance.currentTime = entrance.duration;
-  } catch {}
-
-  showLogoInstant();
-  document.body.classList.add("docked", "ready");
-
-  setAudioConsent();        // gesture happened → persist consent
-  startPlaylist();
-
-  hideOverlay();
-  started = true;
-  entranceStarted = false;
-}
-
-/** Normal flow: Play -> entrance -> playlist */
-function startNormal() {
-  if (started) return;
-  started = true;
-
-  setAudioConsent();  // pressing Play grants/persists consent
-  fadeInLogo();
-
-  entrance.play()
-    .then(() => {
-      entranceStarted = true;
-      entrance.addEventListener("ended", () => {
-        startPlaylist();
-      }, { once: true });
-      hideOverlay();
-    })
-    .catch(err => {
-      console.warn("Autoplay blocked; waiting for gesture:", err);
-      started = false;
-      showOverlay();
+  if (startBtn && playerInput) {
+    startBtn.addEventListener('click', () => {
+      let n = parseInt(playerInput.value, 10);
+      if (!Number.isFinite(n) || n < 1) n = 1;
+      if (n > 16) n = 16;
+      // navigate to the game page with players as a query param
+      window.location.href = `game.html?players=${n}`;
     });
-}
-
-/** Legacy alias */
-function skipIntro() { skipToMenu(); }
-
-/* Overlay clicks */
-overlay.addEventListener("click", (e) => {
-  const target = e.target;
-  if (target && target.id === "begin") {
-    startNormal();
-  } else {
-    skipToMenu();
   }
-}, { capture: true });
 
-/* Keyboard (while overlay visible) */
-document.addEventListener("keydown", (e) => {
-  if (overlay && !overlay.classList.contains("hidden")) {
-    const k = e.key;
-    if (k === "Escape" || (typeof k === "string" && k.toLowerCase() === "s")) {
+  // Open modal: save last focused element and move focus into modal
+  let lastFocused = null;
+  if (optionsBtn && modal && closeOptions) {
+    optionsBtn.addEventListener('click', () => {
+      lastFocused = document.activeElement;
+      modal.hidden = false;
+      document.body.classList.add('modal-open'); // CSS can use this to prevent scroll
+      // focus the close button
+      closeOptions.focus();
+    });
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+  }
+
+  if (closeOptions) closeOptions.addEventListener('click', closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+
+  // Basic focus-trap and Escape handling while modal is open
+  if (modal) {
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        } else if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      }
+    });
+  }
+
+  // allow Enter to start
+  const form = document.getElementById('menu-form');
+  if (form && startBtn) {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      skipToMenu();
-    }
+      startBtn.click();
+    });
   }
-});
-
-/* Play via Enter/Space on the button */
-beginBtn.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    startNormal();
-  }
-});
-
-/* Pause/resume with tab visibility; resume only if consent persisted */
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    entrance.pause();
-    player.pause();
-  } else if (started && hasAudioConsent()) {
-    if (entranceStarted && !entrance.ended) {
-      entrance.play().catch(() => {});
-    } else {
-      player.play().catch(() => {});
-    }
-  }
-});
-
-/* Initial overlay (no intro/menu persistence) */
-window.addEventListener("DOMContentLoaded", () => {
-  overlay.classList.remove("hidden");
-});
-
-/* Cleanup */
-window.addEventListener("beforeunload", () => {
-  entrance.pause();
-  player.pause();
 });
