@@ -14,7 +14,24 @@
       <p id="menu-desc">Configure players then start the game.</p>
 
       <label for="player-count">Player count</label>
-      <input id="player-count" name="player-count" type="number" min="1" max="16" value="4" />
+      <select id="player-count" name="player-count" aria-label="Player count">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4" selected>4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+      </select>
 
       <div class="controls">
         <button type="button" id="start-game">Start Game</button>
@@ -30,8 +47,8 @@
 
         <!-- Tabs -->
         <nav class="options-tabs" role="tablist" aria-label="Options Tabs">
+          <button type="button" class="tab-btn" data-tab="house-rules" role="tab" aria-selected="false">House Rules</button>
           <button type="button" class="tab-btn active" data-tab="dice-scores" role="tab" aria-selected="true">Dice Scores</button>
-          <button type="button" class="tab-btn" data-tab="placeholder" role="tab" aria-selected="false">Other</button>
         </nav>
 
         <div id="options-desc" class="modal-body">
@@ -69,9 +86,9 @@
             </form>
           </section>
 
-          <!-- Placeholder panel -->
-          <section id="placeholder" class="options-panel" role="tabpanel" hidden>
-            <p>Other options will go here.</p>
+          <!-- House Rules panel -->
+          <section id="house-rules" class="options-panel" role="tabpanel" hidden>
+            <p>House rules will go here.</p>
           </section>
         </div>
 
