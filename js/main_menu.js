@@ -183,7 +183,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const liveDiffers = formDiffersFromDefaults();
 
       const useCustom = savedDiffers || liveDiffers;
-      window.location.href = `game.html?players=${n}&custom=${useCustom ? "1" : "0"}`;
+      const targetPage = useCustom ? 'gameCustom.html' : 'game.html';
+      window.location.href = `${targetPage}?players=${n}&custom=${useCustom ? "1" : "0"}`;
     });
   }
 

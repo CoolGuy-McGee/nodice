@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoDice Game</title>
+    <link rel="icon" type="image/x-icon" href="assets/dicedn.png" />
+    <link rel="stylesheet" href="./css/style.css">
+
+    <!-- Game music (pointed to customGameJs folder) -->
+    <!-- <script src="./js/customGameJs/game_music.js" defer></script> -->
+</head>
+<body>
+    <h1 id="playerTitle">Player 1 Turn</h1>
+
+    <div id="dice-container">
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb"></div>
+        </div>
+    </div>
+
+    <button id="roll-btn">Roll All Dice</button>
+    <button id="select-all-btn">Select All</button>
+    <button id="bank-btn">Bank Score</button>
+    <button id="endturn-btn">End Turn</button>
+
+    <h2>Score: <span id="score">0</span></h2>
+    <h2>Run Score: <span id="runscore">0</span></h2>
+
+    <div id="message"></div>
+    <div id="players"></div>
+
+    <!-- launch DiceRunGame from js/customGameJs (this page is only used for custom games) -->
+    <script type="module">
+        import c_GameStart from "./js/customGameJs/c_GameStart.js";
+
+        const params = new URLSearchParams(window.location.search);
+        let players = parseInt(params.get("players"), 10);
+        if (!Number.isFinite(players) || players < 1) players = 4;
+        if (players > 16) players = 16;
+
+        // This page is only used for custom games — use the GameStart entrypoint and tell it to use custom mode.
+        new c_GameStart().start(players, true);
+    </script>
+</body>
+</html>
