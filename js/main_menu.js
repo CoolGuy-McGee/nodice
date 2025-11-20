@@ -97,6 +97,54 @@ document.addEventListener("DOMContentLoaded", () => {
       const saved = loadSavedOptions();
       populateDiceFormFrom(saved);
       applyActiveTabState();
+
+      // --- House rules persistence (moved from inline index.html script) ---
+      const HR_KEY_ENABLED = "houseRules.requireFirstRun";
+      const HR_KEY_MIN = "houseRules.firstRunMin";
+      const elEnableHR = document.getElementById("hr_enable_first_run");
+      const elMinHR = document.getElementById("hr_first_run_min");
+      const btnSaveHR = document.getElementById("save-house-rules");
+      const btnResetHR = document.getElementById("reset-house-rules");
+
+      function loadHouseRules() {
+        try {
+          const enabled = localStorage.getItem(HR_KEY_ENABLED);
+          const min = localStorage.getItem(HR_KEY_MIN);
+          // default OFF when not previously set
+          if (elEnableHR) elEnableHR.checked = enabled === null ? false : (enabled === "true");
+          if (elMinHR) elMinHR.value = min === null ? 500 : Number(min) || 500;
+        } catch (e) { /* ignore storage errors */ }
+      }
+
+      function saveHouseRules() {
+        if (!elEnableHR || !elMinHR) return;
+        try {
+          localStorage.setItem(HR_KEY_ENABLED, elEnableHR.checked ? "true" : "false");
+          localStorage.setItem(HR_KEY_MIN, String(Math.max(0, Math.floor(Number(elMinHR.value) || 0))));
+          console.info("House rules saved");
+        } catch (e) { console.warn("Failed to save house rules", e); }
+      }
+
+      function resetHouseDefaults() {
+        if (!elEnableHR || !elMinHR) return;
+        elEnableHR.checked = false; // default OFF
+        elMinHR.value = 500;
+        saveHouseRules();
+      }
+
+      // Initialize values on page load
+      loadHouseRules();
+
+      // Ensure modal open refresh also loads house rules (in case others changed localStorage)
+      if (optionsBtn && modal) {
+        optionsBtn.addEventListener('click', () => {
+          loadHouseRules();
+        });
+      }
+
+      if (btnSaveHR) btnSaveHR.addEventListener('click', saveHouseRules);
+      if (btnResetHR) btnResetHR.addEventListener('click', resetHouseDefaults);
+
       const focusTarget = modal.querySelector('#save-dice-scores') || modal.querySelector('button');
       if (focusTarget) focusTarget.focus();
     });
@@ -172,51 +220,70 @@ document.addEventListener("DOMContentLoaded", () => {
     startBtn.addEventListener('click', () => {
       let n = parseInt(playerInput.value, 10);
       if (!Number.isFinite(n) || n < 1) n = 1;
-      if (n > 16) n = 16;
+      if (n > 6) n = 6;
+      playerInput.value = n;
 
-      const saved = loadSavedOptions();
-      const savedDiffers = !!saved && !!saved.diceScores && Object.keys(DEFAULT_DICE_SCORES).some(
-        k => (saved.diceScores[k] ?? DEFAULT_DICE_SCORES[k]) !== DEFAULT_DICE_SCORES[k]
-      );
+      const vals = readDiceFormValues();
+      if (!vals) return;
 
-      // Also detect unsaved edits in the open modal (if user changed then clicked Start directly)
-      const liveDiffers = formDiffersFromDefaults();
-
-      const useCustom = savedDiffers || liveDiffers;
-      const targetPage = useCustom ? 'gameCustom.html' : 'game.html';
-      window.location.href = `${targetPage}?players=${n}&custom=${useCustom ? "1" : "0"}`;
-    });
-  }
-
-  if (modal) {
-    modal.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeModal();
-        return;
-      }
-      if (e.key === 'Tab') {
-        const focusables = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (!focusables.length) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        } else if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
+      // Determine if dice scores differ from defaults
+      let diceChanged = false;
+      for (const k of Object.keys(DEFAULT_DICE_SCORES)) {
+        if ((vals[k] ?? DEFAULT_DICE_SCORES[k]) !== DEFAULT_DICE_SCORES[k]) {
+          diceChanged = true;
+          break;
         }
       }
+
+      // Determine if house rules differ from defaults (default: disabled, min = 500)
+      const HR_KEY_ENABLED = "houseRules.requireFirstRun";
+      const HR_KEY_MIN = "houseRules.firstRunMin";
+      const hrEnabled = localStorage.getItem(HR_KEY_ENABLED) === "true";
+      const hrMin = Number(localStorage.getItem(HR_KEY_MIN) ?? 500) || 500;
+      const houseChanged = hrEnabled || (hrMin !== 500);
+
+      const customMode = diceChanged || houseChanged;
+
+      const opts = {
+        diceScores: vals,
+        useCustom: customMode,
+        savedAt: Date.now(),
+        // include explicit house-rule fields when enabled so the game can read them
+        ...(hrEnabled ? { requireFirstRun: true, firstRunMin: Math.max(0, Math.floor(hrMin)) } : {})
+      };
+
+      // Persist or clear options depending on whether custom mode is required
+      try {
+        if (customMode) {
+          saveOptions(opts);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (e) { /* ignore */ }
+
+      // Close modal BEFORE navigation
+      closeModal();
+
+      // Choose target page: prefer game.html for "normal" mode, gameCustom.html for custom.
+      // If game.html is not present, fall back to gameCustom.html.
+      const customUrl = "gameCustom.html";
+      const normalUrl = "game.html";
+
+      if (customMode) {
+        window.location.href = customUrl;
+        return;
+      }
+
+      // Try to verify normalUrl exists, otherwise fallback
+      fetch(normalUrl, { method: "HEAD" }).then(res => {
+        if (res.ok) {
+          window.location.href = normalUrl;
+        } else {
+          window.location.href = customUrl;
+        }
+      }).catch(() => {
+        window.location.href = customUrl;
+      });
     });
   }
-
-  const form = document.getElementById('menu-form');
-  if (form && startBtn) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      startBtn.click();
-    });
-  }
-
-  applyActiveTabState();
 });

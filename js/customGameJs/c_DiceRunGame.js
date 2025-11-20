@@ -27,6 +27,19 @@ export default class c_DiceRunGame {
         this.endTurnConfirmPending = false;
         this.firstTurnQualified = false;
         this.firstRunThreshold = (DICE_SCORES.first_run_min ?? 3);
+        // Apply house-rule override (if configured via Options -> House Rules)
+        try {
+          const hrEnabled = localStorage.getItem("houseRules.requireFirstRun");
+          const hrMinRaw = localStorage.getItem("houseRules.firstRunMin");
+          const hrMin = Number(hrMinRaw);
+          if (hrEnabled === "true" && Number.isFinite(hrMin) && hrMin >= 0) {
+            this.firstRunThreshold = hrMin;
+          }
+          this.houseRuleFirstRunEnabled = hrEnabled === "true";
+        } catch (e) {
+          // ignore localStorage errors; fall back to DICE_SCORES value
+          this.houseRuleFirstRunEnabled = false;
+        }
 
         this.generator = null;
         this.audio = null;
@@ -305,7 +318,11 @@ export default class c_DiceRunGame {
         const base = (this.firstRunThreshold ?? (DICE_SCORES.first_run_min ?? 300));
         if (this.firstRunThreshold == null) this.firstRunThreshold = base;
 
-        const needMin = (this.totalScore === 0 && !this.firstTurnQualified);
+        // Use per-player onBoard flag (set by PlayerHandler._recordTurn). If the
+        // house-rule is enabled and the active player is not on-board, require
+        // a run >= base to bank.
+        const activePlayer = this.players._getActivePlayer();
+        const needMin = (this.houseRuleFirstRunEnabled && activePlayer && !activePlayer.onBoard);
         if (needMin && this.runScore < base) {
             if (!this.endTurnConfirmPending) {
                 const canStill = this._anyTrue(this._computeSelectableMaskConsideringBanked());
@@ -382,7 +399,16 @@ export default class c_DiceRunGame {
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = false;
             if (this.ui.buttonBank) this.ui.buttonBank.disabled = this.currentRollScore <= 0;
             // Disable End Turn when hot dice must be rolled again
-            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = !!isHotDice;
+            // Additionally, if the house-rule is enabled and the active player is not yet "on board",
+            // require the configured first-run minimum before allowing End Turn.
+            let disableEndTurn = !!isHotDice;
+            try {
+                const activePlayer = this.players._getActivePlayer();
+                const threshold = this.firstRunThreshold ?? (DICE_SCORES.first_run_min ?? 300);
+                const needsFirstRun = this.houseRuleFirstRunEnabled && activePlayer && !activePlayer.onBoard && (this.runScore < threshold);
+                if (needsFirstRun) disableEndTurn = true;
+            } catch (e) { /* ignore */ }
+            if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = disableEndTurn;
             if (this.ui.buttonSelectAll) this.ui.buttonSelectAll.disabled = !this._anyTrue(selectableMask);
             if (this.ui.buttonEndTurn) { this.ui.buttonEndTurn.textContent = "End Turn"; }
             if (this.ui.buttonSelectAll) {

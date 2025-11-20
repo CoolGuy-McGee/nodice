@@ -25,6 +25,10 @@ export default class c_initialize {
 
         this.players._attach(this.$playersWrapSel, this.$titleSel, true);
 
+        // IMPORTANT: share the same PlayerHandler instance with the game so
+        // onBoard and other per-player state updates are visible to the game logic.
+        this.game.players = this.players;
+
         this.$roll = document.querySelector("#roll-btn");
         this.$end = document.querySelector("#end-turn-btn");
 

@@ -69,6 +69,24 @@ export default class c_PlayerHandler {
         const hi  = Math.max(0, Math.floor(highestSingleRollScore || 0));
         p.totalScore += add;
         p.highestDiceScore = Math.max(p.highestDiceScore, hi);
+
+        // Determine "on board" (first-run qualified) per-player.
+        // If the house-rule is enabled, require the configured first-run minimum
+        // (stored in localStorage). If the house-rule is disabled, consider any
+        // positive total as being on-board.
+        try {
+            const enabled = localStorage.getItem("houseRules.requireFirstRun");
+            if (enabled === "true") {
+                const min = Number(localStorage.getItem("houseRules.firstRunMin")) || 0;
+                if (!p.onBoard && add >= min) p.onBoard = true;
+            } else {
+                if (!p.onBoard && p.totalScore > 0) p.onBoard = true;
+            }
+        } catch (e) {
+            // ignore storage errors; fall back to simple rule
+            if (!p.onBoard && p.totalScore > 0) p.onBoard = true;
+        }
+
         this._render();
     }
 
@@ -89,7 +107,8 @@ export default class c_PlayerHandler {
             name: `Player ${idx + 1}`,
             color: palette,
             totalScore: 0,
-            highestDiceScore: 0
+            highestDiceScore: 0,
+            onBoard: false
         };
     }
 

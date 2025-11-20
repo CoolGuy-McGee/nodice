@@ -47,8 +47,9 @@
 
         <!-- Tabs -->
         <nav class="options-tabs" role="tablist" aria-label="Options Tabs">
-          <button type="button" class="tab-btn" data-tab="house-rules" role="tab" aria-selected="false">House Rules</button>
-          <button type="button" class="tab-btn active" data-tab="dice-scores" role="tab" aria-selected="true">Dice Scores</button>
+          <!-- Make House Rules the default tab -->
+          <button type="button" class="tab-btn active" data-tab="house-rules" role="tab" aria-selected="true">House Rules</button>
+          <button type="button" class="tab-btn" data-tab="dice-scores" role="tab" aria-selected="false">Dice Scores</button>
         </nav>
 
         <div id="options-desc" class="modal-body">
@@ -87,8 +88,22 @@
           </section>
 
           <!-- House Rules panel -->
-          <section id="house-rules" class="options-panel" role="tabpanel" hidden>
-            <p>House rules will go here.</p>
+          <section id="house-rules" class="options-panel" role="tabpanel">
+             <form id="house-rules-form">
+               <p>Configure house rules for the custom dice run game.</p>
+               
+               <div class="field-row">
+                 <label for="hr_enable_first_run">
+                   <input id="hr_enable_first_run" type="checkbox" /> Require first-run minimum to get on board
+                 </label>
+                 <input id="hr_first_run_min" name="hr_first_run_min" type="number" min="0" step="10" value="500" />
+               </div>
+  
+                <div class="modal-actions">
+                  <button type="button" id="reset-house-rules">Reset Defaults</button>
+                  <button type="button" id="save-house-rules">Save</button>
+                </div>
+              </form>
           </section>
         </div>
 
@@ -100,5 +115,5 @@
   </main>
 
   <script src="./js/main_menu.js" defer></script>
-</body>
+ </body>
 </html>
