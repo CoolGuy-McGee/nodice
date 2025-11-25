@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NoDice Game</title>
     <link rel="icon" type="image/x-icon" href="assets/dicedn.png" />
+    <title>NoDice Game</title>
     <link rel="stylesheet" href="./css/style.css">
 
     <!-- Game music not written yet  -->
@@ -107,12 +107,13 @@
     <script type="module">
         import c_gameStart from "./js/c_GameStart.js";
 
-        const params = new URLSearchParams(window.location.search);
-        let players = parseInt(params.get("players"), 10);
+        // doesn't work const params = new URLSearchParams(window.location.search);
+        let players = parseInt(localStorage.getItem("players", 10));
         if (!Number.isFinite(players) || players < 1) players = 16;
-        if (players > 1) players = 16;
+        if (players < 1) players = 16;
 
-        const custom = params.get("custom") === "1";
+        // doesn't workconst custom = params.get("custom") === "1";
+        const custom = "0"
         new c_gameStart().start(players, custom);
     </script>
 </body>

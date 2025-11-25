@@ -1,14 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="assets/dicedn.png" />
   <title>NoDice — Main Menu</title>
   <link rel="stylesheet" href="./css/main_menu.css">
 </head>
 <body>
   <main id="main-menu" aria-labelledby="menu-title">
-    <h1 id="menu-title">NoDice</h1>
+    <div id="dice-container">
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb" style="background-position: 0% -100.2%"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb" style="background-position: -100% -100.2%"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb" style="background-position: -200% -100.2%"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb" style="background-position: -300% -100.2%"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb" style="background-position: -400% -100.2%"></div>
+        </div>
+        <div class="dice-display">
+            <div class="dice-color"></div>
+            <div class="dice-numb" style="background-position: -500% -100.2%"></div>
+        </div>
+    </div>
+
+    <h2>The All Dice Game</h2>
 
     <form id="menu-form" aria-describedby="menu-desc">
       <p id="menu-desc">Configure players then start the game.</p>
@@ -32,6 +60,14 @@
         <option value="15">15</option>
         <option value="16">16</option>
       </select>
+
+      <script>
+        let playerd = document.getElementById('player-count');
+        
+        playerd.addEventListener('change', function () {
+            localStorage.setItem("players", this.value);
+        });
+      </script>
 
       <div class="controls">
         <button type="button" id="start-game">Start Game</button>
