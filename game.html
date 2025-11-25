@@ -60,20 +60,57 @@
     <button id="select-all-btn">Select All</button>
     <button id="bank-btn">Bank Score</button>
     <button id="endturn-btn">End Turn</button>
-
+    
     <h2>Score: <span id="score">0</span></h2>
     <h2>Run Score: <span id="runscore">0</span></h2>
 
     <div id="message"></div>
     <div id="players"></div>
 
+    <div id="win-modal">
+        <h2 id="win-message">Player X Wins!</h2>
+        <div class="win-modal-content">
+            <div id="grid-half1">
+                <ul class="bar-scores">
+                    <li>
+                        <img src="assets/dicedn.png" alt="dice icon" />
+                        <span class="scorelist-player">Player 1</span>
+                        <span class="scorelist-score">10000</span>
+                        <span class="circle">
+                        </span>
+                    </li>
+                    <li>
+                        <img src="assets/dicedn.png" alt="dice icon" />
+                        <span class="scorelist-player">Player 1</span>
+                        <span class="scorelist-score">10000</span>
+                        <span class="circle">
+                        </span>
+                    </li>
+                    <li>
+                        <img src="assets/dicedn.png" alt="dice icon" />
+                        <span class="scorelist-player">Player 1</span>
+                        <span class="scorelist-score">10000</span>
+                        <span class="circle">
+                        </span>
+                    </li>
+                </ul>
+            </div>
+            <div id="grid-half2">
+                <section id="player-scroll">
+                    <section id="credits">
+                        <p>text</p>
+                    </section>
+                </section>
+            </div>
+        </div>
+    </div>
     <script type="module">
         import c_gameStart from "./js/c_GameStart.js";
 
         const params = new URLSearchParams(window.location.search);
         let players = parseInt(params.get("players"), 10);
-        if (!Number.isFinite(players) || players < 1) players = 4;
-        if (players > 16) players = 16;
+        if (!Number.isFinite(players) || players < 1) players = 16;
+        if (players > 1) players = 16;
 
         const custom = params.get("custom") === "1";
         new c_gameStart().start(players, custom);
