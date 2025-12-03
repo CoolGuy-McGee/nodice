@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById('options-modal');
   const modalBackdrop = modal ? modal.querySelector('.modal-backdrop') : null;
   const playerInput = document.getElementById('player-count');
+    localStorage.setItem("players", 4);
 
   // Ensure modal is hidden by default (fix "open by default" bug)
   if (modal) modal.hidden = true;
@@ -220,8 +221,9 @@ document.addEventListener("DOMContentLoaded", () => {
     startBtn.addEventListener('click', () => {
       let n = parseInt(playerInput.value, 10);
       if (!Number.isFinite(n) || n < 1) n = 1;
-      if (n > 6) n = 6;
+      if (n > 16) n = 16;
       playerInput.value = n;
+        // TODO: make it not reset to 6
 
       const vals = readDiceFormValues();
       if (!vals) return;
