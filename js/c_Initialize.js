@@ -41,6 +41,15 @@ export default class c_initialize {
         if (maybeHook) {
             this.game._onEndTurn = (evt) => {
                 this.players._commitPendingTurn(this.game.runScore || 0);
+            
+                // WHY DOES THIS NOT WORK PROPERLY???
+        // const activePlayer = this.players?._getActivePlayer?.();
+        // const activeScore  = activePlayer ? activePlayer.totalScore : 0;
+        // if (activeScore >= DICE_SCORES.win_score) {
+        //     this.audio?._playSfx("celebration");
+        //     this._triggerWin();
+        //     return;
+        // }
                 maybeHook(evt);
                 this.players._nextPlayer();
             };

@@ -243,7 +243,7 @@ export default class c_UIRenderer {
                         close();
                         window.open(
                             "index.html",
-                            "_blank"
+                            "_self",
                         )
                     });
                 } else {

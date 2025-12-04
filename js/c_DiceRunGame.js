@@ -14,7 +14,7 @@ export default class c_DiceRunGame {
         this.ui = new c_UIRenderer();
         this.selectionManager = new c_SelectionManager();
         this.players = new c_PlayerHandler();
-
+        
         this.latestDiceValues = [1, 1, 1, 1, 1, 1];
         this.selectedDiceMask = [false, false, false, false, false, false];
         this.bankedDiceMask = [false, false, false, false, false, false];
@@ -22,25 +22,25 @@ export default class c_DiceRunGame {
         this.runScore = 0;
         this.totalScore = 0;
         this.hasRolledAtLeastOnce = false;
-
+        
         this.mustBankBeforeReroll = false;
         this.endTurnConfirmPending = false;
         this.firstTurnQualified = false;
         this.firstRunThreshold = (DICE_SCORES.first_run_min ?? 3);
-
+        
         this.generator = null;
         this.audio = null;
-
+        
         // track whether we've already played the farkle (noDice) sfx for the current farkle event
         this._farkleSfxPlayed = false;
         
         // GAME OVER FLAG
         this.gameOver = false;
-
+        
         this._initialize();
         this._wireUIEvents();
     }
-
+    
     _initialize() {
         this.ui._setMessage("Computing probabilities…");
         this.probabilityModel._initialize();
@@ -51,7 +51,7 @@ export default class c_DiceRunGame {
         if (this.ui.buttonEndTurn) {
             this.ui.buttonEndTurn.textContent = "End Turn";
         }
-
+        
         // Universal audio system
         this.audio = new c_AudioHandler({
             base: "assets/audio/game/sfx/",
@@ -64,40 +64,40 @@ export default class c_DiceRunGame {
         this.ui._setMessage('Ready. Press "Roll" to begin.');
         this._refreshUI();
     }
-
+    
     _wireUIEvents() {
         if (this.ui.buttonRoll) this.ui.buttonRoll.addEventListener("click", () => this._onRoll());
         if (this.ui.buttonBank) this.ui.buttonBank.addEventListener("click", () => this._onBank());
         if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.addEventListener("click", () => this._onEndTurn());
-
+        
         const diceClicks = this.ui._getDiceImg();
         for (let i = 0; i < diceClicks.length; i++) {
             diceClicks[i].addEventListener("click", () => this._onToggleSelectDie(i));
         }
-
+        
         if (this.ui.buttonSelectAll) {
             this.ui.buttonSelectAll.addEventListener("click", () => this._onSelectAllAvailable());
         }
     }
-
+    
     // Play the farkle/no-dice SFX only once per farkle event
     _playFarkleSfxOnce() {
         if (this._farkleSfxPlayed) return;
         this._farkleSfxPlayed = true;
         this.audio?._playSfx("noDice");
     }
-
+    
     _onRoll(evt) {
         if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) {
             this.mustBankBeforeReroll = false; // first roll should never be blocked
         }
-
+        
         if (this.hasRolledAtLeastOnce && this.mustBankBeforeReroll) {
             const allBanked = this.bankedDiceMask && this.bankedDiceMask.every(Boolean); // hot dice if true
             const preSelectableMask = this._computeSelectableMaskConsideringBanked();
             const anySelectable = this._anyTrue(preSelectableMask);
-
+            
             if (!anySelectable) {
                 if (!allBanked) {
                     // Farkle branch: freeze for 2s, disable both buttons, then end turn.
@@ -107,17 +107,17 @@ export default class c_DiceRunGame {
                     this.endTurnConfirmPending = false;
                     // play no-dice once
                     this._playFarkleSfxOnce();
-
+                    
                     // freeze flags & UI
                     this._farkleFreeze = true;
                     if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
                     if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
-
+                    
                     // set visual farkle state
                     this.ui?._setFarkleVisual?.(true);
-
+                    
                     this._refreshUI(undefined, 0, "Farkle! Please wait…");
-
+                    
                     // handoff after 2 seconds
                     clearTimeout(this._farkleT);
                     this._farkleT = setTimeout(() => {
@@ -135,10 +135,10 @@ export default class c_DiceRunGame {
                 return;
             }
         }
-
+        
         if (this.bankedDiceMask.every(Boolean))
             this.bankedDiceMask = [false, false, false, false, false, false];
-
+        
         const resultObject = (this.generator.roll
             ? this.generator.roll()
             : this.generator._rollSixDiceWeighted());
@@ -150,10 +150,10 @@ export default class c_DiceRunGame {
                 this.latestDiceValues[i] = rolled[j++];
             }
         }
-
+        
         this.hasRolledAtLeastOnce = true;
         this.selectedDiceMask = [false, false, false, false, false, false];
-
+        
         const selectableMask = this._computeSelectableMaskConsideringBanked();
         if (!this._anyTrue(selectableMask)) {
             // post-roll farkle: same 2s freeze behavior
@@ -163,16 +163,16 @@ export default class c_DiceRunGame {
             this.endTurnConfirmPending = false;
             // play no-dice once
             this._playFarkleSfxOnce();
-
+            
             this._farkleFreeze = true;
             if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
             if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
-
+            
             // set visual farkle state
             this.ui?._setFarkleVisual?.(true);
-
+            
             this._refreshUI(resultObject.patternKey, resultObject.score, "Farkle! Please wait…");
-
+            
             clearTimeout(this._farkleT);
             this._farkleT = setTimeout(() => {
                 this._farkleFreeze = false;
@@ -180,27 +180,27 @@ export default class c_DiceRunGame {
             }, 2000);
             return;
         }
-
+        
         // Successful roll -> clear any farkle visual
         this.ui?._setFarkleVisual?.(false);
-
+        
         // Successful roll
         const selectableMaskAmount = selectableMask
-            .map((val, idx) => (val === true ? idx : null))
-            .filter(idx => idx !== null);
-
+        .map((val, idx) => (val === true ? idx : null))
+        .filter(idx => idx !== null);
+        
         this.audio?._playSfx("diceRoll");
         this.audio?._playDiceSuccessForSelectable(selectableMaskAmount.length);
-
+        
         this.mustBankBeforeReroll = true;
         this.endTurnConfirmPending = false;
         this._refreshUI(resultObject.patternKey, resultObject.score);
     }
-
+    
     _onToggleSelectDie(dieIndex) {
         if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) return;
-
+        
         const selectableMask = this._computeSelectableMaskConsideringBanked();
         if (this.bankedDiceMask[dieIndex]) {
             this.audio?._playSfx("disabled");
@@ -216,21 +216,21 @@ export default class c_DiceRunGame {
         this.audio?._playSfx("buttonClick");
         this._refreshUI();
     }
-
+    
     _onSelectAllAvailable() {
         if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) return;
-
+        
         const selectableMask = this._computeSelectableMaskConsideringBanked();
-
+        
         // Check if all selectable dice are already selected
         const allSelectableSelected = selectableMask.every(
             (val, i) => !val || this.selectedDiceMask[i]
         );
-
+        
         // Toggle: if all selectable dice are already selected, deselect them
         const newSelectState = !allSelectableSelected;
-
+        
         let changed = false;
         for (let i = 0; i < 6; i++) {
             if (selectableMask[i]) {
@@ -241,18 +241,18 @@ export default class c_DiceRunGame {
                 this.selectedDiceMask[i] = this.selectedDiceMask[i] && selectableMask[i];
             }
         }
-
+        
         if (!changed) {
             this.ui._setMessage("No selectable dice right now.");
             this.audio?._playSfx("disabled");
             return;
         }
-
+        
         this._recomputeSelectedScore();
         this.audio?._playSfx("buttonClick");
         this._refreshUI(undefined, undefined, newSelectState ? "All available dice selected." : "All available dice deselected.");
     }
-
+    
     _onBank(evt) {
         if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) return;
@@ -261,30 +261,38 @@ export default class c_DiceRunGame {
             this.audio?._playSfx("notAllowed");
             return;
         }
-
+        
         for (let i = 0; i < 6; i++) if (this.selectedDiceMask[i]) this.bankedDiceMask[i] = true;
-
+        
         this.runScore += this.currentRollScore;
         this.currentRollScore = 0;
         this.selectedDiceMask = [false, false, false, false, false, false];
         this.mustBankBeforeReroll = false;
         this.endTurnConfirmPending = false;
-
+        
         this.audio?._playSfx("buttonClick");
         this._refreshUI(undefined, undefined, "Banked. Roll or End Turn.");
     }
-
+    
     _onEndTurn(evt) {
+        console.log("End Turn triggered", evt);
+        const activePlayer = this.players?._getActivePlayer?.();
+        const activeScore  = activePlayer ? activePlayer.totalScore : 0;
+        if (activeScore >= DICE_SCORES.win_score) {
+            this.audio?._playSfx("celebration");
+            this._triggerWin();
+            return;
+        }
         if (this.gameOver) return;
         // If a farkle freeze is active, ignore accidental/early end-turns
         if (this._farkleFreeze && !(evt && evt.reason === "farkle-timeout")) return;
-
+        
         // ---- FAST PATH FOR FARKLE (no confirmation, immediate end) ----
         if (evt && (evt.reason === "farkle" || evt.reason === "farkle-timeout")) {
             // Ensure turn ends cleanly on farkle without triggering first-run confirmation
             // play no-dice once (will be a no-op if already played)
             this._playFarkleSfxOnce();
-
+            
             this.runScore = 0;
             this.currentRollScore = 0;
             this.bankedDiceMask = [false, false, false, false, false, false];
@@ -292,15 +300,15 @@ export default class c_DiceRunGame {
             this.hasRolledAtLeastOnce = false;
             this.mustBankBeforeReroll = false;
             this.endTurnConfirmPending = false;
-
+            
             // reset visible dice to initial "1" state for next player
             this.latestDiceValues = [1,1,1,1,1,1];
-
+            
             // clear visual farkle state
             this.ui?._setFarkleVisual?.(false);
-
+            
             this._refreshUI(undefined, undefined, "Farkle! Turn ended.");
-
+            
             // reset flag so next farkle will play its SFX
             this._farkleSfxPlayed = false;
             return;
@@ -330,15 +338,6 @@ export default class c_DiceRunGame {
         } else {
             this.totalScore += this.runScore;
             if (this.totalScore > 0) this.firstTurnQualified = true;
-            
-            // Get the current player score
-            const activePlayer = this.players?._getActivePlayer?.();
-            const activeScore = activePlayer ? activePlayer.totalScore : 0;
-
-            if (activeScore >= DICE_SCORES.win_score) {
-                this.audio?._playSfx("celebration");
-                this._triggerWin();
-            }
         }
 
 
