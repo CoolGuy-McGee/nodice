@@ -16,5 +16,5 @@ export const DICE_SCORES = {
   two_triplets: 2500,
   four_any_w_pair: 2500,
   first_run_min: 300,
-  win_score: 10000
+  win_score: 200
 };

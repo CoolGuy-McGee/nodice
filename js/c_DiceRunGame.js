@@ -33,6 +33,9 @@ export default class c_DiceRunGame {
 
         // track whether we've already played the farkle (noDice) sfx for the current farkle event
         this._farkleSfxPlayed = false;
+        
+        // GAME OVER FLAG
+        this.gameOver = false;
 
         this._initialize();
         this._wireUIEvents();
@@ -85,6 +88,7 @@ export default class c_DiceRunGame {
     }
 
     _onRoll(evt) {
+        if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) {
             this.mustBankBeforeReroll = false; // first roll should never be blocked
         }
@@ -194,6 +198,7 @@ export default class c_DiceRunGame {
     }
 
     _onToggleSelectDie(dieIndex) {
+        if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) return;
 
         const selectableMask = this._computeSelectableMaskConsideringBanked();
@@ -213,6 +218,7 @@ export default class c_DiceRunGame {
     }
 
     _onSelectAllAvailable() {
+        if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) return;
 
         const selectableMask = this._computeSelectableMaskConsideringBanked();
@@ -248,6 +254,7 @@ export default class c_DiceRunGame {
     }
 
     _onBank(evt) {
+        if (this.gameOver) return;
         if (!this.hasRolledAtLeastOnce) return;
         if (this.currentRollScore <= 0) {
             this.ui?._showHelpBubbleNearEvent?.(evt, "Select scoring dice before banking.");
@@ -268,6 +275,7 @@ export default class c_DiceRunGame {
     }
 
     _onEndTurn(evt) {
+        if (this.gameOver) return;
         // If a farkle freeze is active, ignore accidental/early end-turns
         if (this._farkleFreeze && !(evt && evt.reason === "farkle-timeout")) return;
 
@@ -322,10 +330,17 @@ export default class c_DiceRunGame {
         } else {
             this.totalScore += this.runScore;
             if (this.totalScore > 0) this.firstTurnQualified = true;
-            if (this.runScore > 0) {
+            
+            // Get the current player score
+            const activePlayer = this.players?._getActivePlayer?.();
+            const activeScore = activePlayer ? activePlayer.totalScore : 0;
+
+            if (activeScore >= DICE_SCORES.win_score) {
                 this.audio?._playSfx("celebration");
+                this._triggerWin();
             }
         }
+
 
         this.runScore = 0;
         this.currentRollScore = 0;
@@ -346,6 +361,34 @@ export default class c_DiceRunGame {
 
         // ensure farkle visuals cleared on normal end-turn as well
         this.ui?._setFarkleVisual?.(false);
+    }
+
+    _triggerWin() {
+        this.gameOver = true;
+
+        // disable main buttons
+        if (this.ui.buttonRoll) this.ui.buttonRoll.disabled = true;
+        if (this.ui.buttonBank) this.ui.buttonBank.disabled = true;
+        if (this.ui.buttonEndTurn) this.ui.buttonEndTurn.disabled = true;
+        if (this.ui.buttonSelectAll) this.ui.buttonSelectAll.disabled = true;
+
+        // clear any farkle state
+        this._farkleFreeze = false;
+        this.ui?._setFarkleVisual?.(false);
+
+        // update win text
+        const active = this.players?._getActivePlayer?.();
+        const winEl = document.getElementById("win-message");
+        if (winEl && active) {
+            winEl.textContent = `${active.name} Wins!`;
+        }
+
+        // open modal with all players for bar chart
+        const playersForModal = this.players?._getAllPlayers?.() || [];
+        this.ui?._openWinModal?.(playersForModal);
+
+        // celebration SFX
+        this.audio?._playSfx("celebration");
     }
 
     _recomputeSelectedScore() {
@@ -407,6 +450,6 @@ export default class c_DiceRunGame {
                 : (!this.hasRolledAtLeastOnce ? "Waiting for first roll…" : ""));
 
         this.ui._setMessage(baseMessage);
-        this.ui._setScoreDisplay(this.currentRollScore, this.runScore, this.players._getActivePlayer.totalScore);
+        this.ui._setScoreDisplay(this.currentRollScore, this.runScore, this.totalScore);
     }
 }

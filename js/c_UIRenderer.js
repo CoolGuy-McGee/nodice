@@ -14,7 +14,56 @@ export default class c_UIRenderer {
         this.showInfoBox = true;
 
         this._lastMessage = "";
+        this.winModal = document.getElementById("win-modal");
+        this.winModalExit = this.winModal
+            ? this.winModal.querySelector("#exit")
+            : null;
+        this.winModalButtons = this.winModal
+            ? Array.from(this.winModal.querySelectorAll("#buttonGrid .end-button"))
+            : [];
+
+        this._wireWinModalButtons();
     }
+
+    _wireWinModalButtons() {
+        if (!this.winModal) return;
+
+        const close = () => this._closeWinModal();
+
+        if (this.winModalExit) {
+            this.winModalExit.addEventListener("click", close);
+        }
+
+        if (this.winModalButtons && this.winModalButtons.length) {
+            this.winModalButtons.forEach((btn) => {
+                const label = (btn.textContent || "").trim().toLowerCase();
+
+                if (label.startsWith("new game")) {
+                    btn.addEventListener("click", () => {
+                        close();
+                        // simplest version: full reset
+                        window.location.reload();
+                    });
+                } else if (label.startsWith("settings")) {
+                    btn.addEventListener("click", () => {
+                        close();
+                        // hook your settings modal / page here
+                    });
+                } else {
+                    // "Rick Roll Yourself" (or any other fun button)
+                    btn.addEventListener("click", () => {
+                        close();
+                        window.open(
+                            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            "_blank",
+                            "noopener"
+                        );
+                    });
+                }
+            });
+        }
+    }
+
 
     _getDiceImg() {
         const byId = [];
@@ -166,5 +215,114 @@ export default class c_UIRenderer {
         if (!this.containerDice) return;
         if (on) this.containerDice.classList.add("farkle");
         else this.containerDice.classList.remove("farkle");
+    }
+    
+    _wireWinModalButtons() {
+        if (!this.winModal) return;
+
+        const close = () => this._closeWinModal();
+
+        if (this.winModalExit) {
+            this.winModalExit.addEventListener("click", close);
+        }
+
+        if (this.winModalButtons && this.winModalButtons.length) {
+            this.winModalButtons.forEach((btn) => {
+                const label = (btn.textContent || "").trim().toLowerCase();
+
+                if (label.startsWith("new game")) {
+                    console.log("clickn")
+                    btn.addEventListener("click", () => {
+                        close();
+                        // simplest version: full reset
+                        window.location.reload();
+                    });
+                } else if (label.startsWith("settings")) {
+                    console.log("clicks")
+                    btn.addEventListener("click", () => {
+                        close();
+                        window.open(
+                            "index.html",
+                            "_blank"
+                        )
+                    });
+                } else {
+                    // Rick Roll Yourself
+                    console.log("clickr")
+                    btn.addEventListener("click", () => {
+                        close();
+                        window.open(
+                            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                            "_blank",
+                        );
+                    });
+                }
+            });
+        }
+    }
+
+       _updateWinModalBars(players = []) {
+        if (!this.winModal) return;
+        const list = this.winModal.querySelector("ul.bar-scores");
+        if (!list) return;
+
+        const items = Array.isArray(players) && players.length
+            ? players.slice(0, 6)
+            : [];
+
+        // If nothing provided, leave the static mockup alone.
+        if (!items.length) return;
+
+        const maxScore = items.reduce(
+            (max, p) => Math.max(max, Number(p.totalScore) || 0),
+            0
+        ) || 1;
+
+        // Let CSS know how many bars we actually have (again, max 6).
+        const root = document.documentElement;
+        if (root) {
+            root.style.setProperty(
+                "--player-count",
+                String(Math.min(items.length, 6))
+            );
+        }
+
+        list.innerHTML = "";
+
+        for (const p of items) {
+            const score = Number(p.totalScore) || 0;
+            const scale = score <= 0 ? 0 : score / maxScore;
+
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <div class="bar-contents-container" style="--bar-scale:${scale}">
+                    <img src="assets/dicedn.png" alt="dice icon" />
+                    <span class="scorelist-player">${p.name}</span>
+                    <span class="scorelist-score">${score}</span>
+                    <span class="circle"></span>
+                </div>
+            `;
+
+            // optional: tint bars using the PlayerHandler palette if provided
+            const bar = li.querySelector(".bar-contents-container");
+            if (bar && p.color) {
+                bar.style.setProperty("--bar-bg", p.color.bg || "");
+                bar.style.setProperty("--bar-fg", p.color.fg || "");
+                bar.style.setProperty("--bar-border", p.color.border || "");
+            }
+
+            list.appendChild(li);
+        }
+    }
+
+    _openWinModal(players) {
+        if (!this.winModal) return;
+        this._updateWinModalBars(players);
+        this.winModal.classList.add("is-open");
+    }
+
+    _closeWinModal() {
+        if (!this.winModal) return;
+        this.winModal.classList.remove("is-open");
     }
 }

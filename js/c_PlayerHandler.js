@@ -40,13 +40,33 @@ export default class c_PlayerHandler {
         this._players = [];
         for (let i = 0; i < count; i++) this._players.push(this._createDefaultPlayer(i));
         this._active = 0;
+        this._syncPlayerCountCssVar();
         this._render();
         this._syncTitle();
     }
 
     _getActiveIndex() { return this._active; }
     _getActivePlayer() { return this._players[this._active]; }
+    _getActiveIndex() { return this._active; }
 
+    _getPlayerCount() {
+        return this._players.length;
+    }
+
+    _getAllPlayers() {
+        return this._players.slice();
+    }
+
+    
+
+    _syncPlayerCountCssVar() {
+        const root = document.documentElement;
+        if (!root) return;
+        const count = Math.min(this._players.length || 1, 6);
+        root.style.setProperty("--player-count", String(count));
+    }
+
+    
     _nextPlayer() {
         if (!this._players.length) return;
         this._active = (this._active + 1) % this._players.length;
@@ -126,6 +146,8 @@ export default class c_PlayerHandler {
 
     _render() {
         if (!this._container) return;
+
+        this._syncPlayerCountCssVar();      
         this._container.innerHTML = "";
         this._container.classList.add("players-wrap");
 

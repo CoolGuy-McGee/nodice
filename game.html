@@ -68,30 +68,64 @@
     <div id="players"></div>
 
     <div id="win-modal">
+        <button id="exit">X</button>
         <h2 id="win-message">Player X Wins!</h2>
         <div class="win-modal-content">
             <div id="grid-half1">
                 <ul class="bar-scores">
                     <li>
-                        <img src="assets/dicedn.png" alt="dice icon" />
-                        <span class="scorelist-player">Player 1</span>
-                        <span class="scorelist-score">10000</span>
-                        <span class="circle">
-                        </span>
+                        <div class="bar-contents-container">
+                            <img src="assets/dicedn.png" alt="dice icon" />
+                            <span class="scorelist-player">Player 1</span>
+                            <span class="scorelist-score">10000</span>
+                            <span class="circle">
+                            </span>
+                        </div>
                     </li>
                     <li>
-                        <img src="assets/dicedn.png" alt="dice icon" />
-                        <span class="scorelist-player">Player 1</span>
-                        <span class="scorelist-score">10000</span>
-                        <span class="circle">
-                        </span>
+                        <div class="bar-contents-container">
+                            <img src="assets/dicedn.png" alt="dice icon" />
+                            <span class="scorelist-player">Player 1</span>
+                            <span class="scorelist-score">10000</span>
+                            <span class="circle">
+                            </span>
+                        </div>
                     </li>
                     <li>
-                        <img src="assets/dicedn.png" alt="dice icon" />
-                        <span class="scorelist-player">Player 1</span>
-                        <span class="scorelist-score">10000</span>
-                        <span class="circle">
-                        </span>
+                        <div class="bar-contents-container">
+                            <img src="assets/dicedn.png" alt="dice icon" />
+                            <span class="scorelist-player">Player 1</span>
+                            <span class="scorelist-score">10000</span>
+                            <span class="circle">
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="bar-contents-container">
+                            <img src="assets/dicedn.png" alt="dice icon" />
+                            <span class="scorelist-player">Player 1</span>
+                            <span class="scorelist-score">10000</span>
+                            <span class="circle">
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="bar-contents-container">
+                            <img src="assets/dicedn.png" alt="dice icon" />
+                            <span class="scorelist-player">Player 1</span>
+                            <span class="scorelist-score">10000</span>
+                            <span class="circle">
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="bar-contents-container">
+                            <img src="assets/dicedn.png" alt="dice icon" />
+                            <span class="scorelist-player">Player 1</span>
+                            <span class="scorelist-score">10000</span>
+                            <span class="circle">
+                            </span>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -103,13 +137,18 @@
                 </section>
             </div>
         </div>
+        <section id="buttonGrid">
+            <button class="end-button" type="reset">New Game</button>
+            <button class="end-button">Settings</button>
+            <button class="end-button">Rick Roll Yourself</button>
+        </section>
     </div>
     <script type="module">
         import c_gameStart from "./js/c_GameStart.js";
 
         // doesn't work const params = new URLSearchParams(window.location.search);
         let players = parseInt(localStorage.getItem("players", 10));
-        if (!Number.isFinite(players) || players < 1) players = 16;
+        if (!Number.isFinite(players) || players < 1) players = 6;
         if (players < 1) players = 16;
 
         // doesn't workconst custom = params.get("custom") === "1";
